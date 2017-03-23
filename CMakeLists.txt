@@ -4,7 +4,7 @@
 # \author    J. Bakosi
 # \copyright 2012-2015, Jozsef Bakosi, 2016, Los Alamos National Security, LLC.
 # \brief     Build quinoa third-party Libraries
-# \date      Thu 09 Mar 2017 12:46:09 PM MST
+# \date      Mon 13 Mar 2017 07:18:20 AM MDT
 #
 ################################################################################
 
@@ -103,8 +103,6 @@ endif()
 # If we are to build our own Charm++, setup prerequisites for its build command
 if (charm)
 
-  message(STATUS "Will build Charm++'")
-
   # Use mpi wrappers by default
   set(CHARM_COMPILER "")
 
@@ -112,6 +110,12 @@ if (charm)
   if(ARCH MATCHES "x86_64")
 
     set(CHARM_ARCH "-${ARCH}")
+
+  elseif(ARCH MATCHES "ppc64")
+
+    set(SYSTEM_NAME "")
+    set(CHARM_ARCH "bluegeneq")
+    set(CHARM_COMPILER "clang")
 
   elseif(ARCH MATCHES "i386")
 
@@ -377,6 +381,12 @@ else()
   set(tut "tut")
 endif()
 
+# Detect Zlib (only for static link and only on ppc64, required because we do
+# not build it if it is not found)
+if(ARCH MATCHES "ppc64")
+ find_package(ZLIB REQUIRED)
+endif()
+
 # Detect NumDiff
 find_package(NumDiff)
 if(NumDiff_FOUND)
@@ -484,6 +494,10 @@ if (netcdf)
     set(NETCDF_SHARED "--enable-shared")
   else()
     set(NETCDF_SHARED "--enable-static;--disable-shared;--with-pic")
+    if(ARCH MATCHES "ppc64")
+      set(NETCDF_ZLIB "LIBS=${ZLIB_LIBRARIES}")
+      set(NETCDF_DISABLE_TESTS "--disable-testsets")
+    endif()
   endif()
   ExternalProject_Add(
     netcdf
@@ -503,6 +517,8 @@ if (netcdf)
                       --disable-fsync
                       --disable-dap
                       ${NETCDF_SHARED}
+                      ${NETCDF_DISABLE_TESTS}
+                      ${NETCDF_ZLIB}
                       --prefix=${CMAKE_INSTALL_PREFIX}
     BUILD_IN_SOURCE 1
     LOG_DOWNLOAD 1
@@ -525,8 +541,8 @@ if (aec)
     PREFIX aec
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/aec
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D CMAKE_Fortran_COMPILER:PATH=${UNDERLYING_Fortran_COMPILER}
-               -D CMAKE_Fortran_FLAGS:STRING=${FFLAGS}
+               -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
+               -D CMAKE_C_FLAGS:STRING=${FCLAGS}
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
     DOWNLOAD_COMMAND ""
@@ -591,7 +607,11 @@ if(BUILD_SHARED_LIBS)
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=ON")
 else()
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=OFF;-DTPL_FIND_SHARED_LIBS:BOOL=OFF;-DTrilinos_LINK_SEARCH_START_STATIC:BOOL=ON;-DCMAKE_SKIP_INSTALL_RPATH=TRUE")
-  set(tr_hdf5 "-DTrilinos_EXTRA_LINK_FLAGS=-L${hdf5_library_dirs} -lhdf5_hl -lhdf5 -lz -lm -ldl")
+  if(ARCH MATCHES "ppc64")
+    set(tr_hdf5 "-DTrilinos_EXTRA_LINK_FLAGS=-L${hdf5_library_dirs} -lhdf5_hl -lhdf5 ${ZLIB_LIBRARIES} -lm -ldl")
+  else()
+    set(tr_hdf5 "-DTrilinos_EXTRA_LINK_FLAGS=-L${hdf5_library_dirs} -lhdf5_hl -lhdf5 -lz -lm -ldl")
+  endif()
 endif()
 if (HOST_OS MATCHES "alpine")
   set(TRILINOS_ALPINE "-DBLAS_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib;-DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib")
