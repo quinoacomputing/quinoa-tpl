@@ -1,6 +1,7 @@
 [submodule "src/aec"]
 	path = src/aec
-	url = https://gitlab.dkrz.de/k202009/libaec.git
+#	url = https://gitlab.dkrz.de/k202009/libaec.git
+	url = https://github.com/erget/libaec.git
 [submodule "src/blas"]
 	path = src/blas
 	url = https://github.com/quinoacomputing/BLAS.git
