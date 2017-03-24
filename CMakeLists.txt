@@ -4,7 +4,7 @@
 # \author    J. Bakosi
 # \copyright 2012-2015, Jozsef Bakosi, 2016, Los Alamos National Security, LLC.
 # \brief     Build quinoa third-party Libraries
-# \date      Thu 23 Mar 2017 09:59:03 PM MDT
+# \date      Fri 24 Mar 2017 07:38:10 AM MDT
 #
 ################################################################################
 
@@ -848,8 +848,7 @@ if (pugixml)
   ExternalProject_Add(
     pugixml
     PREFIX pugixml
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/pugixml
-    SOURCE_SUBDIR scripts
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/pugixml/scripts
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
