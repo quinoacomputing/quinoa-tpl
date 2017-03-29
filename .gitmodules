@@ -56,3 +56,6 @@
 [submodule "src/tut"]
 	path = src/tut
 	url = https://github.com/mrzechonek/tut-framework.git
+[submodule "cmake"]
+	path = cmake
+	url = https://github.com/quinoacomputing/cmake-modules.git

@@ -14,7 +14,7 @@ project(TPL C CXX Fortran)
 include(ExternalProject)
 
 # Quinoa cmake modules directory
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Disallow in-source builds
 include(DisallowInSourceBuilds)
