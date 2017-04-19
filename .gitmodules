@@ -13,7 +13,8 @@
 	url = https://github.com/quinoacomputing/BoostMPLCartesianProduct.git
 [submodule "src/charm"]
 	path = src/charm
-	url = http://charm.cs.uiuc.edu/gerrit/charm
+#	url = http://charm.cs.uiuc.edu/gerrit/charm
+	url = https://github.com/UIUC-PPL/charm.git
 [submodule "src/h5part"]
 	path = src/h5part
 	url = https://github.com/quinoacomputing/H5Part.git
