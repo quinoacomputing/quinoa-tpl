@@ -26,7 +26,7 @@
 	url = ../../quinoacomputing/HYPRE.git
 [submodule "src/lapack"]
 	path = src/lapack
-	url = ../../quinoacomputing/LAPACK.git
+	url = ../../Reference-LAPACK/lapack.git
 [submodule "src/netcdf"]
 	path = src/netcdf
 	url = ../../Unidata/netcdf-c.git
