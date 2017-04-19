@@ -1,61 +1,63 @@
 [submodule "src/aec"]
 	path = src/aec
 #	url = https://gitlab.dkrz.de/k202009/libaec.git
-	url = https://github.com/erget/libaec.git
+	url = ../../erget/libaec.git
 [submodule "src/blas"]
 	path = src/blas
-	url = https://github.com/quinoacomputing/BLAS.git
+	url = ../../quinoacomputing/BLAS.git
 [submodule "src/boost"]
 	path = src/boost
-	url = https://github.com/quinoacomputing/Boost.git
+	url = ../../quinoacomputing/Boost.git
 [submodule "src/cartesian_product"]
 	path = src/cartesian_product
-	url = https://github.com/quinoacomputing/BoostMPLCartesianProduct.git
+	url = ../../quinoacomputing/BoostMPLCartesianProduct.git
 [submodule "src/charm"]
 	path = src/charm
-	url = http://charm.cs.uiuc.edu/gerrit/charm
+#	url = http://charm.cs.uiuc.edu/gerrit/charm
+	url = ../../UIUC-PPL/charm.git
 [submodule "src/h5part"]
 	path = src/h5part
-	url = https://github.com/quinoacomputing/H5Part.git
+	url = ../../quinoacomputing/H5Part.git
 [submodule "src/hdf5"]
 	path = src/hdf5
-	url = https://github.com/quinoacomputing/HDF5.git
+	url = ../../quinoacomputing/HDF5.git
 [submodule "src/hypre"]
 	path = src/hypre
-	url = https://github.com/quinoacomputing/HYPRE.git
+	url = ../../quinoacomputing/HYPRE.git
 [submodule "src/lapack"]
 	path = src/lapack
-	url = https://github.com/Reference-LAPACK/lapack.git
+	url = ../../Reference-LAPACK/lapack.git
 [submodule "src/netcdf"]
 	path = src/netcdf
-	url = https://github.com/Unidata/netcdf-c.git
+	url = ../../Unidata/netcdf-c.git
 [submodule "src/numdiff"]
 	path = src/numdiff
-	url = https://github.com/quinoacomputing/ndiff.git
+	url = ../../quinoacomputing/ndiff.git
 [submodule "src/pegtl"]
 	path = src/pegtl
-	url = https://github.com/ColinH/PEGTL.git
+	url = ../../ColinH/PEGTL.git
 [submodule "src/pstreams"]
 	path = src/pstreams
-	url = https://git.code.sf.net/p/pstreams/code
+#	url = https://git.code.sf.net/p/pstreams/code
+	url = ../../jwakely/pstreams.git 
 [submodule "src/pugixml"]
 	path = src/pugixml
-	url = https://github.com/zeux/pugixml.git
+	url = ../../zeux/pugixml.git
 [submodule "src/random123"]
 	path = src/random123
-	url = https://github.com/quinoacomputing/Random123.git
+	url = ../../quinoacomputing/Random123.git
 [submodule "src/rngsse2"]
 	path = src/rngsse2
-	url = https://github.com/quinoacomputing/RNGSSE2.git
+	url = ../../quinoacomputing/RNGSSE2.git
 [submodule "src/testu01"]
 	path = src/testu01
-	url = https://github.com/quinoacomputing/TestU01-threadsafe.git
+	url = ../../quinoacomputing/TestU01-threadsafe.git
 [submodule "src/trilinos"]
 	path = src/trilinos
-	url = https://github.com/trilinos/Trilinos.git
+	url = ../../trilinos/Trilinos.git
 [submodule "src/tut"]
 	path = src/tut
-	url = https://github.com/mrzechonek/tut-framework.git
+	url = ../../mrzechonek/tut-framework.git
 [submodule "cmake"]
 	path = cmake
-	url = https://github.com/quinoacomputing/cmake-modules.git
+	url = ../../quinoacomputing/cmake-modules.git
