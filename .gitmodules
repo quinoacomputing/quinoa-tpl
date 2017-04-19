@@ -38,7 +38,8 @@
 	url = https://github.com/ColinH/PEGTL.git
 [submodule "src/pstreams"]
 	path = src/pstreams
-	url = https://git.code.sf.net/p/pstreams/code
+#	url = https://git.code.sf.net/p/pstreams/code
+	url = https://github.com/jwakely/pstreams.git 
 [submodule "src/pugixml"]
 	path = src/pugixml
 	url = https://github.com/zeux/pugixml.git
