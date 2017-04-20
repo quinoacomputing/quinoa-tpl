@@ -313,16 +313,11 @@ endif()
 
 # Detect blas and lapack, exclude if found, build if not
 set(lapack "lapack")
-set(blas "blas")
 find_package(MKL)     # Prefer MKL if found
 if(MKL_FOUND)
-  set(blas "")
   set(lapack "")
 else()
   find_package(BLAS)
-  if(BLAS_FOUND)
-    set(blas "")
-  endif()
   find_package(LAPACKE)
   if(LAPACKE_FOUND)
     set(lapack "")
@@ -396,7 +391,7 @@ else()
 endif()
 
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
-${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf} ${blas}
+${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
 ${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff})
 
 list(LENGTH tpls2build ntpl)
@@ -552,38 +547,12 @@ if (aec)
   )
 endif()
 
-#### blas ######################################################################
-# http://www.netlib.org/blas
-if (blas)
-  ExternalProject_Add(
-    blas
-    PREFIX blas
-    SOURCE_DIR ${PROJECT_BINARY_DIR}/blas
-    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                     ${PROJECT_SOURCE_DIR}/src/blas
-                     ${PROJECT_BINARY_DIR}/blas
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E make_directory 
-                      ${CMAKE_INSTALL_PREFIX}/lib
-    BUILD_COMMAND make -j${PROCESSOR_COUNT} PLAT='' OPTS=-fPIC
-                  FORTRAN=${UNDERLYING_Fortran_COMPILER}
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy
-                    ${PROJECT_BINARY_DIR}/blas/blas.a
-                    ${CMAKE_INSTALL_PREFIX}/lib/libblas.a
-    BUILD_IN_SOURCE 1
-    DOWNLOAD_COMMAND ""
-    CONFIGURE_COMMAND ""
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
 #### lapack ####################################################################
 # http://www.netlib.org/lapack
 if (lapack)
   ExternalProject_Add(
     lapack
     PREFIX lapack
-    DEPENDS ${blas}
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/lapack
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_Fortran_COMPILER:PATH=${UNDERLYING_Fortran_COMPILER}
@@ -591,8 +560,6 @@ if (lapack)
                -D BUILD_TESTING:BOOL=OFF
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                -D LAPACKE:BOOL=ON
-               -D USE_OPTIMIZED_BLAS:BOOL=ON
-               -D USE_OPTIMIZED_LAPACK:BOOL=ON
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                ${MACOSX_RPATH}
     DOWNLOAD_COMMAND ""
@@ -633,7 +600,7 @@ endif()
 if(trilinos)
   ExternalProject_Add(
     trilinos
-    DEPENDS ${hdf5} ${netcdf} ${blas} ${lapack}
+    DEPENDS ${hdf5} ${netcdf} ${lapack}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
