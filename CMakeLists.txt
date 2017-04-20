@@ -583,6 +583,7 @@ if (lapack)
   ExternalProject_Add(
     lapack
     PREFIX lapack
+    DEPENDS ${blas}
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/lapack
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_Fortran_COMPILER:PATH=${UNDERLYING_Fortran_COMPILER}
