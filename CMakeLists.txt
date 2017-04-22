@@ -4,7 +4,6 @@
 # \author    J. Bakosi
 # \copyright 2012-2015, Jozsef Bakosi, 2016, Los Alamos National Security, LLC.
 # \brief     Build quinoa third-party Libraries
-# \date      Fri 24 Mar 2017 07:38:10 AM MDT
 #
 ################################################################################
 
@@ -439,6 +438,7 @@ if (charm)
     BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/build
                   charm++
                   ${CHARM_ARCHITECTURE}
+                  ${CHARM_EXTRA_ARGS}
                   ${CHARM_COMPILER}
                   ${CHARM_PTHREADS}
                   ${CHARM_SHARED}
