@@ -1,0 +1,31 @@
+################################################################################
+# vim: filetype=dockerfile:
+#
+# \file      docker/alpine
+# \author    J. Bakosi
+# \copyright 2012-2015, Jozsef Bakosi, 2016, Los Alamos National Security, LLC.
+# \brief     Dockerfile for testing the third-party libraries build for Quinoa
+#
+################################################################################
+
+FROM alpine:latest
+RUN apk update && apk add bash grep m4 perl git cmake make gfortran gcc g++
+
+ADD https://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.2.tar.gz /openmpi/
+RUN cd /openmpi/ && tar xzf openmpi-2.0.2.tar.gz && cd openmpi-2.0.2 && ./configure --enable-shared --disable-static --enable-mpi-cxx --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install
+ENV PATH /opt/openmpi/bin:$PATH
+ENV LD_LIBRARY_PATH /opt/openmpi/lib:$LD_LIBRARY_PATH
+RUN rm -rf /openmpi
+
+# Create symbolic link to /lib/cpp for the charm++ build, see
+# https://lists.cs.illinois.edu/lists/arc/charm/2016-05/msg00013.html
+RUN ln -s /usr/bin/cpp /lib/cpp
+
+RUN addgroup quinoa
+RUN adduser -S quinoa quinoa
+RUN chown -R quinoa:quinoa /home/quinoa
+USER quinoa
+WORKDIR /home/quinoa
+
+RUN git clone --recursive https://github.com/quinoacomputing/quinoa-tpl.git
+RUN cd quinoa-tpl && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
