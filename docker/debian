@@ -16,7 +16,4 @@ USER quinoa
 WORKDIR /home/quinoa
 
 RUN git clone --recursive https://github.com/quinoacomputing/quinoa-tpl.git
-USER root
-RUN apt-get install -y zlib1g-dev
-USER quinoa
 RUN cd quinoa-tpl && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
