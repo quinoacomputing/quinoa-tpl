@@ -9,7 +9,7 @@
 ################################################################################
 
 FROM debian:testing
-RUN apt-get update -y && apt-get install -y git cmake gfortran g++ libopenmpi-dev m4 zlib1g-dev
+RUN apt-get update -y && apt-get install -y git autoconf cmake gfortran g++ libopenmpi-dev m4 zlib1g-dev
 
 RUN adduser --gecos "" --disabled-password quinoa
 USER quinoa
