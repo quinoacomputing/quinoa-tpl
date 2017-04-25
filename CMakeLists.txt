@@ -845,6 +845,7 @@ if(h5part)
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                      ${PROJECT_SOURCE_DIR}/src/h5part
                      ${PROJECT_BINARY_DIR}/h5part
+    PATCH_COMMAND autoreconf -fi ${PROJECT_BINARY_DIR}/h5part
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/h5part/configure
                       FC=${MPI_Fortran_COMPILER}
                       FFLAGS=${FFLAGS}
