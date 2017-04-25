@@ -9,7 +9,7 @@
 ################################################################################
 
 FROM alpine:latest
-RUN apk update && apk add autoconf automake bash grep m4 perl zlib-dev git cmake make gfortran gcc g++
+RUN apk update && apk add autoconf automake libtool bash grep m4 perl zlib-dev git cmake make gfortran gcc g++
 
 ADD https://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.2.tar.gz /openmpi/
 RUN cd /openmpi/ && tar xzf openmpi-2.0.2.tar.gz && cd openmpi-2.0.2 && ./configure --enable-shared --disable-static --enable-mpi-cxx --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install
