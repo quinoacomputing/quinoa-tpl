@@ -32,7 +32,7 @@
 	url = ../../quinoacomputing/ndiff.git
 [submodule "src/pegtl"]
 	path = src/pegtl
-	url = ../../ColinH/PEGTL.git
+	url = ../..taocpp/PEGTL.git
 [submodule "src/pstreams"]
 	path = src/pstreams
 #	url = https://git.code.sf.net/p/pstreams/code
