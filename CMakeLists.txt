@@ -393,7 +393,7 @@ if(ENABLE_ROOT)
   else()
     set(root "root")
     # Root does not support libc++ on linux, so remove if configured
-    string(FIND CXXFLAGS "-stdlib=libc++" pos)
+    string(FIND "${CXXFLAGS}" "-stdlib=libc++" pos)
     if (NOT "${pos}" STREQUAL "-1")
       message(STATUS "Removing C++ compiler flag '-stdlib=libc++' as Root does not support it")
       string(REPLACE "-stdlib=libc++" "" CXXFLAGS ${CXXFLAGS})
