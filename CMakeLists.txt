@@ -195,11 +195,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Cray")  # cray-specific settings
 
 endif()
 
-# Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
-# and echo flags that will be passed to all TPL builds
-include(get_compiler_flags)
-get_compiler_flags()
-
 # Mac OS X specifics
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(MACOSX_RPATH "-DCMAKE_MACOSX_RPATH:BOOL=ON")
@@ -389,9 +384,31 @@ else()
   set(numdiff "numdiff")
 endif()
 
+# Detect Root
+set(ENABLE_ROOT OFF CACHE BOOL "Enable ROOT")
+if(ENABLE_ROOT)
+  find_package(Root COMPONENTS RIO Core Tree Hist)
+  if(Root_FOUND)
+    set(root "")
+  else()
+    set(root "root")
+    # Root does not support libc++ on linux, so remove if configured
+    string(FIND CXXFLAGS "-stdlib=libc++" pos)
+    if (NOT "${pos}" STREQUAL "-1")
+      message(STATUS "Removing C++ compiler flag '-stdlib=libc++' as Root does not support it")
+      string(REPLACE "-stdlib=libc++" "" CXXFLAGS ${CXXFLAGS})
+    endif()
+  endif()
+endif()
+
+# Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
+# and echo flags that will be passed to all TPL builds
+include(get_compiler_flags)
+get_compiler_flags()
+
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
 ${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
-${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff})
+${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root})
 
 list(LENGTH tpls2build ntpl)
 
@@ -877,6 +894,26 @@ if(numdiff)
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+    LOG_DOWNLOAD 1
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
+  )
+endif()
+
+#### Root ######################################################################
+# https://root.cern.ch
+if(root)
+  ExternalProject_Add(
+    root
+    PREFIX root
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/root
+    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+               -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
+               -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
+               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
+               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
     LOG_DOWNLOAD 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
