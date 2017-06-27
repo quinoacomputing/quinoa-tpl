@@ -60,4 +60,4 @@
 	url = ../../quinoacomputing/cmake-modules.git
 [submodule "src/root"]
 	path = src/root
-	url = http://root.cern.ch/git/root.git
+	url = ../../root-project/root.git
