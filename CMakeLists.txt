@@ -282,7 +282,7 @@ else()
 endif()
 
 # Detect PEGTL, exclude if found, build if not
-find_package(PEGTL)
+find_package(PEGTL 2.0.0)
 if(PEGTL_FOUND)
   set(pegtl "")
 else()
