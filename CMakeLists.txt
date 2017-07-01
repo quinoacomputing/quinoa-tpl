@@ -167,8 +167,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")  # gcc-specific settings
 
   # Gnu will use libstdc++ by default. We do not offer libc++.
 
-  # Detect gcc version
-  include(DetectGCCVersion)
+  # Detect compiler version
+  include(DetectCXXversion)
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")  # intel-specific settings
 
