@@ -8,7 +8,7 @@
 ################################################################################
 
 FROM alpine:latest
-RUN apk update && apk add autoconf automake libtool bash grep m4 perl zlib-dev git cmake make gfortran gcc g++ libx11-dev libxpm-dev libxft-dev libxext-dev python
+RUN apk update && apk add autoconf automake libtool bash grep m4 perl zlib-dev git cmake make gfortran gcc g++
 
 ADD https://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.2.tar.gz /openmpi/
 RUN cd /openmpi/ && tar xzf openmpi-2.0.2.tar.gz && cd openmpi-2.0.2 && ./configure --enable-shared --disable-static --enable-mpi-cxx --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install
@@ -27,4 +27,4 @@ USER quinoa
 WORKDIR /home/quinoa
 
 RUN git clone --recursive https://github.com/quinoacomputing/quinoa-tpl.git
-RUN cd quinoa-tpl && mkdir -p build && cd build && cmake -DENABLE_ROOT=on .. && make -sj$(grep -c processor /proc/cpuinfo)
+RUN cd quinoa-tpl && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
