@@ -27,4 +27,4 @@ USER quinoa
 WORKDIR /home/quinoa
 
 RUN git clone --recursive https://github.com/quinoacomputing/quinoa-tpl.git
-RUN cd quinoa-tpl && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
+RUN cd quinoa-tpl && mkdir -p build && cd build && cmake -DENABLE_ROOT=on .. && make -sj$(grep -c processor /proc/cpuinfo)
