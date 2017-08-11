@@ -260,7 +260,7 @@ else()
 endif()
 
 # Detect Hypre, exclude if found, build if not
-find_package(Hypre 2.10.0)
+find_package(Hypre 2.9.0)
 if(HYPRE_FOUND)
   set(hypre "")
 else()
