@@ -910,6 +910,7 @@ if(root)
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+               -Dimt=OFF
     LOG_DOWNLOAD 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
