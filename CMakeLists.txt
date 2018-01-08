@@ -186,7 +186,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")  # pgi-specific settings
   set(PGCPP "CPP=cpp")
 
   # PGI C compiler flags specific to netcdf
-  set(NETCDF_CFLAGS "${CFLAGS} -fPIC")
+  set(CFLAGS "${CFLAGS} -fPIC")
   set(NETCDF_UTILS "--disable-utilities")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Cray")  # cray-specific settings
@@ -520,7 +520,7 @@ if (netcdf)
                      ${PROJECT_BINARY_DIR}/netcdf
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/netcdf/configure
                       CC=${MPI_C_COMPILER}
-                      CFLAGS=${NETCDF_CFLAGS}
+                      CFLAGS=${CFLAGS}
                       ${NETCDF_UTILS}
                       ${PGCPP}
                       ${hdf5_include_dirs_flags}
