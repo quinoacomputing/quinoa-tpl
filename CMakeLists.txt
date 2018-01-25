@@ -834,7 +834,7 @@ if (pugixml)
   ExternalProject_Add(
     pugixml
     PREFIX pugixml
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/pugixml/scripts
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/pugixml
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
