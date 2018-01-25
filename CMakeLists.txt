@@ -113,7 +113,6 @@ if (charm)
 
     set(SYSTEM_NAME "")
     set(CHARM_ARCH "bluegeneq")
-    set(CHARM_COMPILER "clang")
 
   elseif(ARCH MATCHES "i386")
 
