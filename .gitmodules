@@ -4,7 +4,7 @@
 	url = ../../erget/libaec.git
 [submodule "src/boost"]
 	path = src/boost
-	url = ../../quinoacomputing/Boost.git
+	url = ../../boostorg/boost
 [submodule "src/cartesian_product"]
 	path = src/cartesian_product
 	url = ../../quinoacomputing/BoostMPLCartesianProduct.git
