@@ -445,11 +445,16 @@ if (charm)
     charm
     PREFIX charm
     # Move unpacked tarball to install dir and build there
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/charm
                       ${CMAKE_INSTALL_PREFIX}/charm
+    # Will apply patch in SOURCE_DIR which is the same as install dir
+    SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Build in install dir and leave stuff there - no install step
     BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
+    # Patch to executable_start symbol not found: see
+    # https://lists.cs.illinois.edu/lists/arc/charm/2018-05/msg00001.html
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/charm_executable_start_fix.patch --verbose
     # Build Charm++
     BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/build
                   charm++
@@ -462,7 +467,7 @@ if (charm)
                   ${CHARM_ALPINE}
                   -j${PROCESSOR_COUNT}
                   ${CXXFLAGS}
-    DOWNLOAD_COMMAND ""
+    CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     LOG_CONFIGURE 1
     LOG_BUILD 1
