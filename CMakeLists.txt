@@ -454,7 +454,7 @@ if (charm)
     BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Patch to executable_start symbol not found: see
     # https://lists.cs.illinois.edu/lists/arc/charm/2018-05/msg00001.html
-    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/charm_executable_start_fix.patch --verbose
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/charm_executable_start_fix.patch
     # Build Charm++
     BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/build
                   charm++
