@@ -944,7 +944,6 @@ if (backward)
     backward
     PREFIX backward
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/backward-cpp
-    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/backward.patch
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
