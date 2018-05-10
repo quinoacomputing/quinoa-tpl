@@ -334,7 +334,7 @@ endif()
 
 # Detect TestU01
 find_package(TestU01)
-if(TestU01_FOUND OR NO_TESTU01)
+if(TestU01_FOUND)
   set(testu01 "")
 else()
   set(testu01 "testu01")
@@ -400,6 +400,14 @@ if(ENABLE_ROOT)
   endif()
 endif()
 
+# Detect backward-cpp
+find_package(Backward)
+if(Backward_FOUND)
+  set(backward "")
+else()
+  set(backward "backward")
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -407,7 +415,8 @@ get_compiler_flags()
 
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
 ${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
-${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root})
+${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root}
+${backward})
 
 list(LENGTH tpls2build ntpl)
 
@@ -920,6 +929,25 @@ if(root)
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                -Dimt=OFF
+    LOG_DOWNLOAD 1
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
+  )
+endif()
+
+#### Backward-cpp, stack trace pretty printer for C++ ##########################
+# https://github.com/bombela/backward-cpp
+# Header only, only if not found
+if (backward)
+  ExternalProject_Add(
+    backward
+    PREFIX backward
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/backward-cpp
+    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+               -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
+               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
     LOG_DOWNLOAD 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
