@@ -30,4 +30,4 @@ USER quinoa
 WORKDIR /home/quinoa
 
 RUN git clone --recursive https://github.com/quinoacomputing/quinoa-tpl.git
-RUN cd quinoa-tpl && git checkout $COMMIT && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
+RUN cd quinoa-tpl && git checkout $COMMIT && git submodule update --recursive && git submodule status --recursive && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
