@@ -408,6 +408,14 @@ else()
   set(backwardcpp "backwardcpp")
 endif()
 
+# Detect highwayhash
+find_package(HighwayHash)
+if(HighwayHash_FOUND)
+  set(highwayhash "")
+else()
+  set(highwayhash "highwayhash")
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -416,7 +424,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
 ${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
 ${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root}
-${backwardcpp})
+${backwardcpp} ${highwayhash})
 
 list(LENGTH tpls2build ntpl)
 
@@ -952,5 +960,21 @@ if (backwardcpp)
     LOG_CONFIGURE 1
     LOG_BUILD 1
     LOG_INSTALL 1
+  )
+endif()
+
+#### HighwayHash, Fast strong hash functions: SipHash/HighwayHash  #############
+# https://github.com/google/highwayhash
+# Header only, only if not found
+if (highwayhash)
+  ExternalProject_Add(
+    highwayhash
+    PREFIX highwayhash
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/highwayhash/highwayhash
+                      ${CMAKE_INSTALL_PREFIX}/include/highwayhash
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DOWNLOAD_COMMAND ""
   )
 endif()
