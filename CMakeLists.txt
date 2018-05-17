@@ -401,8 +401,8 @@ if(ENABLE_ROOT)
 endif()
 
 # Detect backward-cpp
-find_package(Backward)
-if(Backward_FOUND)
+find_package(BackwardCpp)
+if(BACKWARDCPP_FOUND)
   set(backward "")
 else()
   set(backward "backward")
