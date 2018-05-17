@@ -403,9 +403,9 @@ endif()
 # Detect backward-cpp
 find_package(BackwardCpp)
 if(BACKWARDCPP_FOUND)
-  set(backward "")
+  set(backwardcpp "")
 else()
-  set(backward "backward")
+  set(backwardcpp "backwardcpp")
 endif()
 
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
@@ -416,7 +416,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
 ${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
 ${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root}
-${backward})
+${backwardcpp})
 
 list(LENGTH tpls2build ntpl)
 
@@ -939,10 +939,10 @@ endif()
 #### Backward-cpp, stack trace pretty printer for C++ ##########################
 # https://github.com/bombela/backward-cpp
 # Header only, only if not found
-if (backward)
+if (backwardcpp)
   ExternalProject_Add(
-    backward
-    PREFIX backward
+    backwardcpp
+    PREFIX backwardcpp
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/backward-cpp
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
