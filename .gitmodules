@@ -64,3 +64,6 @@
 [submodule "src/backward-cpp"]
 	path = src/backward-cpp
 	url = ../../bombela/backward-cpp.git
+[submodule "src/highwayhash"]
+	path = src/highwayhash
+	url = ../../google/highwayhash.git
