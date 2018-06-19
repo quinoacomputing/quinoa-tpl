@@ -422,6 +422,16 @@ else()
   set(highwayhash "highwayhash")
 endif()
 
+set(ENABLE_OMEGA_H ON CACHE BOOL "Enable BackwardCpp")
+if (ENABLE_OMEGA_H)
+  find_package(Omega_h)
+  if(OMEGA_H_FOUND)
+    set(omega_h "")
+  else()
+    set(omega_h "omega_h")
+  endif()
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -984,3 +994,22 @@ if (highwayhash)
     DOWNLOAD_COMMAND ""
   )
 endif()
+
+#### Omega_h is a C++11 library that implements tetrahedron and triangle mesh adaptativity####
+# https://github.com/ibaned/omega_h
+# no support for CMAKE_BUILD_TYPE
+if (omega_h)
+  ExternalProject_Add(
+    omega_h
+    PREFIX omega_h
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/omega_h
+    CMAKE_ARGS -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
+               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    LOG_DOWNLOAD 1
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
+  )
+endif()
+
