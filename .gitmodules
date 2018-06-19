@@ -58,9 +58,6 @@
 [submodule "cmake"]
 	path = cmake
 	url = ../../quinoacomputing/cmake-modules.git
-[submodule "src/root"]
-	path = src/root
-	url = ../../root-project/root.git
 [submodule "src/backward-cpp"]
 	path = src/backward-cpp
 	url = ../../bombela/backward-cpp.git
