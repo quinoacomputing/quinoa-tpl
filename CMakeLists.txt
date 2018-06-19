@@ -401,11 +401,14 @@ if(ENABLE_ROOT)
 endif()
 
 # Detect backward-cpp
-find_package(BackwardCpp)
-if(BACKWARDCPP_FOUND)
-  set(backwardcpp "")
-else()
-  set(backwardcpp "backwardcpp")
+set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
+if (ENABLE_BACKWARDCPP)
+  find_package(BackwardCpp)
+  if(BACKWARDCPP_FOUND)
+    set(backwardcpp "")
+  else()
+    set(backwardcpp "backwardcpp")
+  endif()
 endif()
 
 # Detect highwayhash
