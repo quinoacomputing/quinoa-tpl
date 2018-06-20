@@ -422,7 +422,7 @@ else()
   set(highwayhash "highwayhash")
 endif()
 
-set(ENABLE_OMEGA_H ON CACHE BOOL "Enable Omega_h")
+set(ENABLE_OMEGA_H OFF CACHE BOOL "Enable Omega_h")
 if (ENABLE_OMEGA_H)
   find_package(Omega_h)
   if(OMEGA_H_FOUND)
