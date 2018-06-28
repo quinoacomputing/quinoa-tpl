@@ -388,7 +388,7 @@ if(ENABLE_ROOT)
   if(Root_FOUND)
     set(root "")
   elseif(NOT EXISTS ${PROJECT_SOURCE_DIR}/src/root/CMakeLists.txt)
-    message(WARNING "ROOT enabled, not found on system and not checked out as git submodule (try switching to branch 'all' of the tpl repository")
+    message(WARNING "ROOT enabled, but not found on system and not found as a git submodule. If you want ROOT, try switching to branch 'all' of the TPL repository (by running 'git checkout all' in the TPL repo).")
     set(root "")
   else()
     set(root "root")
@@ -995,7 +995,7 @@ if (highwayhash)
   )
 endif()
 
-#### Omega_h, Tetrahedron and triangle mesh adaptativity ####
+#### Omega_h is a C++11 library that implements tetrahedron and triangle mesh adaptativity####
 # https://github.com/ibaned/omega_h
 if (omega_h)
   ExternalProject_Add(
