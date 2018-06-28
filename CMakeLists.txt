@@ -388,7 +388,7 @@ if(ENABLE_ROOT)
   if(Root_FOUND)
     set(root "")
   elseif(NOT EXISTS ${PROJECT_SOURCE_DIR}/src/root/CMakeLists.txt)
-    message(WARNING "ROOT enabled, not found on system and not checkout as git submodule (try switching to 'all branch of the tpl repository")
+    message(WARNING "ROOT enabled, not found on system and not checked out as git submodule (try switching to branch 'all' of the tpl repository")
     set(root "")
   else()
     set(root "root")
@@ -1014,3 +1014,4 @@ if (omega_h)
     LOG_INSTALL 1
   )
 endif()
+
