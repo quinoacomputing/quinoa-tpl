@@ -404,11 +404,14 @@ if(ENABLE_ROOT)
 endif()
 
 # Detect backward-cpp
-find_package(BackwardCpp)
-if(BACKWARDCPP_FOUND)
-  set(backwardcpp "")
-else()
-  set(backwardcpp "backwardcpp")
+set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
+if (ENABLE_BACKWARDCPP)
+  find_package(BackwardCpp)
+  if(BACKWARDCPP_FOUND)
+    set(backwardcpp "")
+  else()
+    set(backwardcpp "backwardcpp")
+  endif()
 endif()
 
 # Detect highwayhash
@@ -419,6 +422,16 @@ else()
   set(highwayhash "highwayhash")
 endif()
 
+set(ENABLE_OMEGA_H OFF CACHE BOOL "Enable Omega_h")
+if (ENABLE_OMEGA_H)
+  find_package(Omega_h)
+  if(OMEGA_H_FOUND)
+    set(omega_h "")
+  else()
+    set(omega_h "omega_h")
+  endif()
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -427,7 +440,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
 ${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
 ${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root}
-${backwardcpp} ${highwayhash})
+${backwardcpp} ${highwayhash} ${omega_h})
 
 list(LENGTH tpls2build ntpl)
 
@@ -979,5 +992,25 @@ if (highwayhash)
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
+  )
+endif()
+
+#### Omega_h, Tetrahedron and triangle mesh adaptativity ####
+# https://github.com/ibaned/omega_h
+if (omega_h)
+  ExternalProject_Add(
+    omega_h
+    PREFIX omega_h
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/omega_h
+    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+               -D USE_XSDK_DEFAULTS:BOOL=ON
+	       -D Omega_h_USE_MPI:BOOL=ON
+	       -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
+               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    LOG_DOWNLOAD 1
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
   )
 endif()
