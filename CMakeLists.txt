@@ -433,6 +433,14 @@ if (ENABLE_OMEGA_H)
   endif()
 endif()
 
+# Detect Brigand
+find_package(Brigand)
+if(Brigand_FOUND)
+  set(brigand "")
+else()
+  set(brigand "brigand")
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -441,7 +449,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
 ${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
 ${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root}
-${backwardcpp} ${highwayhash} ${omega_h})
+${backwardcpp} ${highwayhash} ${omega_h} ${brigand})
 
 list(LENGTH tpls2build ntpl)
 
@@ -1014,3 +1022,20 @@ if (omega_h)
   )
 endif()
 
+#### Brigand ####################################################################
+# https://github.com/edouarda/brigand
+# Header only, only if not found
+if (brigand)
+  ExternalProject_Add(
+    brigand
+    PREFIX brigand
+    # Header-only, copy include dir over
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/brigand/include/brigand
+                      ${CMAKE_INSTALL_PREFIX}/include/brigand
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DOWNLOAD_COMMAND ""
+  )
+endif()
