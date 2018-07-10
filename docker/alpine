@@ -13,8 +13,8 @@ ARG COMMIT
 
 RUN apk update && apk add autoconf automake libtool bash grep m4 perl zlib-dev git cmake make gfortran gcc g++ libexecinfo-dev
 
-ADD https://www.open-mpi.org/software/ompi/v2.0/downloads/openmpi-2.0.2.tar.gz /openmpi/
-RUN cd /openmpi/ && tar xzf openmpi-2.0.2.tar.gz && cd openmpi-2.0.2 && ./configure --enable-shared --disable-static --enable-mpi-cxx --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install
+ADD https://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-3.1.1.tar.gz /openmpi/
+RUN cd /openmpi/ && tar xzf openmpi-3.1.1.tar.gz && cd openmpi-3.1.1 && ./configure --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install
 ENV PATH /opt/openmpi/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/openmpi/lib:$LD_LIBRARY_PATH
 RUN rm -rf /openmpi
@@ -29,5 +29,5 @@ RUN chown -R quinoa:quinoa /home/quinoa
 USER quinoa
 WORKDIR /home/quinoa
 
-RUN git clone --recursive https://github.com/quinoacomputing/quinoa-tpl.git
+RUN git clone --recursive http://github.com/quinoacomputing/quinoa-tpl.git
 RUN cd quinoa-tpl && git checkout $COMMIT && git submodule init && git submodule update --recursive && git submodule status --recursive && mkdir -p build && cd build && cmake .. && make -sj$(grep -c processor /proc/cpuinfo)
