@@ -32,20 +32,6 @@ if (NOT BUILD_SHARED_LIBS)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif()
 
-# Find MPI and get its underlying compilers
-# The get_mpi_compilers cmake function uses the built-in CMake functionality to
-# find the MPI wrappers and based on the wrappers detects the underyling
-# compilers.
-include(MPICompilers)
-get_mpi_compilers()
-
-include(ProcessorCount)
-ProcessorCount(PROCESSOR_COUNT)
-if(PROCESSOR_COUNT EQUAL 0)     # if ncpus could not be determined, assign 1
-  set(PROCESSOR_COUNT "1")
-endif()
-message(STATUS "Found ${PROCESSOR_COUNT} PEs")
-
 # Include support for multiarch path names
 include(GNUInstallDirs)
 
@@ -71,24 +57,17 @@ else()
   message(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
 endif()
 
-# Compilers
-# =========
-# There are two sets of compilers, given by the following CMake variables:
-#
-# 1. The underlying compiler suite
-#
-#    UNDERLYING_C_COMPILER
-#    UNDERLYING_CXX_COMPILER
-#    UNDERLYING_Fortran_COMPILER
-#
-# 2. The MPI wrappers (of the underlying compilers)
-#
-#    MPI_C_COMPILER
-#    MPI_CXX_COMPILER
-#    MPI_Fortran_COMPILER
+include(ProcessorCount)
+ProcessorCount(PROCESSOR_COUNT)
+if(PROCESSOR_COUNT EQUAL 0)     # if ncpus could not be determined, assign 1
+  set(PROCESSOR_COUNT "1")
+endif()
+message(STATUS "Found ${PROCESSOR_COUNT} PEs")
 
 # Convert system name to lower case
 string(TOLOWER ${CMAKE_SYSTEM_NAME} SYSTEM_NAME)
+
+message(STATUS "------------------------------------------")
 
 # Detect charm
 find_package(Charm)
@@ -128,24 +107,95 @@ if (charm)
 
   endif()
 
+  if(ENABLE_AMPI)
+    message(STATUS "Charm++'s Adaptive MPI (AMPI) enabled")
+  endif()
+
   # Set Charm++ architecture
-  if (NOT DEFINED ENV{CRAY_PRGENVPGI} AND
+  if (NOT DEFINED ENV{CRAY_PRGENVPGI} AND  # not Cray
       NOT DEFINED ENV{CRAY_PRGENVGNU} AND
       NOT DEFINED ENV{CRAY_PRGENVCRAY} AND
       NOT DEFINED ENV{CRAY_PRGENVINTEL})
-    set(CHARM_ARCHITECTURE "mpi-${SYSTEM_NAME}${CHARM_ARCH}")
-  else()
-    set(CHARM_ARCHITECTURE "mpi-crayxc")
+
+    if(NOT ENABLE_AMPI)
+      set(CHARM_COMM_SUBSYSTEM "mpi")
+    else()
+      #set(CHARM_COMM_SUBSYSTEM "netlrts")
+      set(CHARM_COMM_SUBSYSTEM "ofi")
+    endif()
+
+    set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
+
+  else()  # Cray
+
+    if(NOT ENABLE_AMPI)
+      set(CHARM_COMM_SUBSYSTEM "mpi")
+    else()
+      set(CHARM_COMM_SUBSYSTEM "gni")
+    endif()
+
+    set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-crayxc")
+
   endif()
 
-  message(STATUS "Charm++ architecture/version: '${CHARM_ARCHITECTURE}'")
+  message(STATUS "Charm++ architecture/version: ${CHARM_ARCHITECTURE}")
 
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Cray")  # cray-specific settings
     set(CHARM_COMPILER "craycc")
-    message(STATUS "Charm++ compiler: '${CHARM_COMPILER}'")
+  elseif (ENABLE_AMPI AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(CHARM_COMPILER "clang")
   endif()
 
+  message(STATUS "Charm++ compiler: ${CHARM_COMPILER}")
+
+  # Compilers
+  # =========
+  # There are two sets of compilers, given by the following CMake variables:
+  #
+  # 1. The underlying compiler suite
+  #    UNDERLYING_C_COMPILER
+  #    UNDERLYING_CXX_COMPILER
+  #    UNDERLYING_Fortran_COMPILER
+  #
+  # 2. The MPI wrappers (of the underlying compilers)
+  #    MPI_C_COMPILER
+  #    MPI_CXX_COMPILER
+  #    MPI_Fortran_COMPILER
+
+  # Find MPI and get its underlying compilers. If a traditional MPI (e.g.,
+  # OpenMPI) is used, the get_mpi_compilers cmake function uses the built-in
+  # CMake functionality to find the MPI wrappers and based on the wrappers
+  # detects the underyling compilers. If Charm++'s Adaptive MPI (AMPI) is used,
+  # the Charm++ TPL build builds Charm++ as well as AMPI and we use the AMPI
+  # wrappers to build MPI libraries.
+  set(ampi "${charm}")  # used as a dependency for MPI libs
+  set(ENABLE_AMPI OFF CACHE BOOL "Enable AMPI")
+  if(NOT ENABLE_AMPI)
+    include(MPICompilers)
+    get_mpi_compilers()
+    set(CHARM_BUILD_TARGET "charm++")
+    set(ampi "")
+    set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
+  else()
+    set(MPI_C_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampicc")
+    set(MPI_CXX_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampicxx")
+    set(AMPI_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/ampirun")
+    set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
+    set(UNDERLYING_C_COMPILER "${CMAKE_C_COMPILER}")
+    set(UNDERLYING_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
+    set(CHARM_BUILD_TARGET "AMPI")
+    MESSAGE(STATUS "MPI C compiler: " ${MPI_C_COMPILER})
+    MESSAGE(STATUS "MPI C++ compiler: " ${MPI_CXX_COMPILER})
+    MESSAGE(STATUS "Underlying C compiler: " ${UNDERLYING_C_COMPILER})
+    MESSAGE(STATUS "Underlying C++ compiler: " ${UNDERLYING_CXX_COMPILER})
+    MESSAGE(STATUS "AMPIrun: ${AMPI_RUN}")
+  endif()
+
+  MESSAGE(STATUS "Charmrun: ${CHARM_RUN}")
+
 endif(charm)
+
+message(STATUS "------------------------------------------")
 
 # Compiler-specific settings
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")  # clang-specific settings
@@ -197,16 +247,21 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(MACOSX_RPATH "-DCMAKE_MACOSX_RPATH:BOOL=ON")
 endif()
 
-# Attempt to find some TPLs on the system (some others we always build)
+# Attempt to find some TPLs on the system
 
-# Detect HDF5, exclude if found, copy if not
+# HDF5
 set(HDF5_PREFER_PARALLEL true)
 if(NOT BUILD_SHARED_LIBS)
   set(HDF5_USE_STATIC_LIBRARIES true)
 endif()
+if(ENABLE_AMPI)
+  set(HDF5_ROOT ${CMAKE_INSTALL_PREFIX})
+endif()
 find_package(HDF5 COMPONENTS C HL)
 
-if(HDF5_FOUND AND HDF5_IS_PARALLEL)
+if ((ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL AND
+     HDF5_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+    (NOT ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL))
   set(hdf5 "")
   set(hdf5_include_dirs_flags "${HDF5_INCLUDE_DIRS}")
   string(REGEX REPLACE "([^;]+)" "CPPFLAGS=-I\\1" hdf5_include_dirs_flags
@@ -219,31 +274,40 @@ if(HDF5_FOUND AND HDF5_IS_PARALLEL)
   string(REGEX REPLACE "([^;]+)" "LDFLAGS=-L\\1" hdf5_library_dirs_flags
         "${hdf5_library_dirs_flags}")
   set(hdf5_library_dirs_flags "${hdf5_library_dirs_flags}/lib")
+  # strip "/lib" and "/lib64"
   if ("${hdf5_root}" MATCHES "lib(64)?$")
-    get_filename_component(hdf5_root ${hdf5_root} DIRECTORY) # strip "/lib" and "/lib64"
+    get_filename_component(hdf5_root ${hdf5_root} DIRECTORY)
   endif()
 else()
-  message(STATUS "HDF5 either not found, not parallel, or disabled: will build")
+  message(STATUS "HDF5 either not found, not parallel, disabled, or AMPI is enabled: will build")
   set(hdf5 "hdf5")
+  set(hdf5_ampi "-ampi")
   set(hdf5_include_dirs_flags "CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/include")
   set(hdf5_library_dirs_flags "LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/lib")
   set(hdf5_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
   set(hdf5_root "${CMAKE_INSTALL_PREFIX}")
 endif()
 
-# Detect NetCDF, exclude if found, build if not
+# NetCDF
+if(ENABLE_AMPI)
+  set(NETCDF_ROOT ${CMAKE_INSTALL_PREFIX})
+endif()
 find_package(NetCDF)
-if(NETCDF_FOUND)
+
+if ((ENABLE_AMPI AND NETCDF_FOUND AND
+     NETCDF_INCLUDES MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+    (NOT ENABLE_AMPI AND NETCDF_FOUND))
   set(netcdf "")
   set(netcdf_include_dirs "${NETCDF_INCLUDES}")
   set(netcdf_library_dirs "${NETCDF_LIBRARY_DIRS}")
 else()
   set(netcdf "netcdf")
+  message(STATUS "NetCDF either not found or AMPI is enabled: will build")
   set(netcdf_include_dirs "${CMAKE_INSTALL_PREFIX}/include")
   set(netcdf_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
 
-# Detect Boost, exclude if found, copy if not
+# Boost
 if(NOT BUILD_SHARED_LIBS)
   set(Boost_USE_STATIC_LIBS true)
 endif()
@@ -254,7 +318,7 @@ else()
   set(boost "boost")
 endif()
 
-# Detect PStreams, exclude if found, build if not
+# PStreams
 find_package(PStreams)
 if(PSTREAMS_FOUND)
   set(pstreams "")
@@ -262,15 +326,22 @@ else()
   set(pstreams "pstreams")
 endif()
 
-# Detect Hypre, exclude if found, build if not
+# Hypre
+if(ENABLE_AMPI)
+  set(HYPRE_ROOT ${CMAKE_INSTALL_PREFIX})
+endif()
 find_package(Hypre 2.9.0)
-if(HYPRE_FOUND)
+
+if ((ENABLE_AMPI AND HYPRE_FOUND AND
+     HYPRE_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+    (NOT ENABLE_AMPI AND HYPRE_FOUND))
   set(hypre "")
 else()
   set(hypre "hypre")
+  message(STATUS "Hypre either not found or AMPI is enabled: will build")
 endif()
 
-# Detect pugixml, exclude if found, build if not
+# Pugixml
 find_package(Pugixml)
 if(PUGIXML_FOUND)
   set(pugixml "")
@@ -278,7 +349,7 @@ else()
   set(pugixml "pugixml")
 endif()
 
-# Detect PEGTL, exclude if found, build if not
+# PEGTL
 find_package(PEGTL 2.0.0)
 if(PEGTL_FOUND)
   set(pegtl "")
@@ -286,7 +357,7 @@ else()
   set(pegtl "pegtl")
 endif()
 
-# Detect Random123, exclude if found, build if not
+# Random123
 find_package(Random123)
 if(Random123_FOUND)
   set(random123 "")
@@ -302,7 +373,7 @@ else()
   set(rngsse2 "rngsse2")
 endif()
 
-# Detect blas and lapack, exclude if found, build if not
+# blas and lapack
 set(lapack "lapack")
 find_package(MKL)     # Prefer MKL if found
 if(MKL_FOUND)
@@ -315,7 +386,7 @@ else()
   endif()
 endif()
 
-# Detect AEC (only for static link)
+# AEC (only for static link)
 if(NOT BUILD_SHARED_LIBS)
   set(aec "aec")
   find_package(AEC)
@@ -324,15 +395,22 @@ if(NOT BUILD_SHARED_LIBS)
   endif()
 endif()
 
-# Detect H5Part
+# H5Part
+if(ENABLE_AMPI)
+  set(H5PART_ROOT ${CMAKE_INSTALL_PREFIX})
+endif()
 find_package(H5Part)
-if(H5Part_FOUND)
+
+if ((ENABLE_AMPI AND H5Part_FOUND AND
+     H5PART_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+    (NOT ENABLE_AMPI AND H5Part_FOUND))
   set(h5part "")
 else()
   set(h5part "h5part")
+  message(STATUS "H5Part either not found or AMPI is enabled: will build")
 endif()
 
-# Detect TestU01
+# TestU01
 find_package(TestU01)
 if(TestU01_FOUND)
   set(testu01 "")
@@ -340,18 +418,21 @@ else()
   set(testu01 "testu01")
 endif()
 
-# Detect Trilinos system-wide and on paths given by "<package>_DIR" cmake or
-# environment variables.
+# Trilinos
 find_package(Zoltan2 QUIET)
 find_package(SEACASExodus QUIET)
 find_package(Exodiff QUIET)
-if(Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND)
+
+if ((ENABLE_AMPI AND Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND AND
+     Zoltan2_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+    (NOT ENABLE_AMPI AND Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND))
   set(trilinos "")
 else()
   set(trilinos "trilinos")
+  message(STATUS "Zoltan2, SEACASExodus, and Exodiff either not found or AMPI is enabled: will build")
 endif()
 
-# Detect BoostMPLCartesianProduct
+# BoostMPLCartesianProduct
 find_package(CartesianProduct)
 if(CARTESIANPRODUCT_FOUND)
   set(cartesian_product "")
@@ -359,7 +440,7 @@ else()
   set(cartesian_product "cartesian_product")
 endif()
 
-# Detect Template Unit Test library
+# Template Unit Test library
 find_package(TUT)
 if(TUT_FOUND)
   set(tut "")
@@ -367,13 +448,12 @@ else()
   set(tut "tut")
 endif()
 
-# Detect Zlib (only for static link and only on ppc64, required because we do
-# not build it if it is not found)
+# Zlib, only for static link and only on ppc64
 if(ARCH MATCHES "ppc64")
  find_package(ZLIB REQUIRED)
 endif()
 
-# Detect NumDiff
+# NumDiff
 find_package(NumDiff)
 if(NumDiff_FOUND)
   set(numdiff "")
@@ -381,7 +461,7 @@ else()
   set(numdiff "numdiff")
 endif()
 
-# Detect Root
+# Root
 set(ENABLE_ROOT OFF CACHE BOOL "Enable ROOT")
 if(ENABLE_ROOT)
   find_package(Root COMPONENTS RIO Core Tree Hist)
@@ -403,7 +483,7 @@ if(ENABLE_ROOT)
   endif()
 endif()
 
-# Detect backward-cpp
+# Backward-cpp
 set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
 if (ENABLE_BACKWARDCPP)
   find_package(BackwardCpp)
@@ -414,7 +494,7 @@ if (ENABLE_BACKWARDCPP)
   endif()
 endif()
 
-# Detect highwayhash
+# Highwayhash
 find_package(HighwayHash)
 if(HighwayHash_FOUND)
   set(highwayhash "")
@@ -422,18 +502,28 @@ else()
   set(highwayhash "highwayhash")
 endif()
 
-# Detect Omega_h
+# Omega_h
 set(ENABLE_OMEGA_H OFF CACHE BOOL "Enable Omega_h")
 if (ENABLE_OMEGA_H)
+
+  if(ENABLE_AMPI)
+    set(OMEGA_H_PREFER_OWN true)
+    set(OMEGA_H_ROOT ${CMAKE_INSTALL_PREFIX})
+  endif()
   find_package(Omega_h)
-  if(OMEGA_H_FOUND)
+
+  if ((ENABLE_AMPI AND Omega_h_FOUND AND
+       OMEGA_H_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+      (NOT ENABLE_AMPI AND Omega_h_FOUND))
     set(omega_h "")
   else()
     set(omega_h "omega_h")
+    message(STATUS "Omega_h either not found or AMPI is enabled: will build")
   endif()
+
 endif()
 
-# Detect Brigand
+# Brigand
 find_package(Brigand)
 if(Brigand_FOUND)
   set(brigand "")
@@ -499,7 +589,7 @@ if (charm)
     PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/charm_executable_start_fix.patch
     # Build Charm++
     BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/build
-                  charm++
+                  ${CHARM_BUILD_TARGET}
                   ${CHARM_ARCHITECTURE}
                   ${CHARM_EXTRA_ARGS}
                   ${CHARM_COMPILER}
@@ -524,16 +614,19 @@ if (hdf5)
   else()
     set(HDF5_SHARED "--disable-shared;--enable-static;--with-pic")
   endif()
+  set(AMPI_RUNSERIAL "RUNSERIAL=\'\'${AMPI_RUN} ++quiet\'\'" )
   ExternalProject_Add(
     hdf5
     PREFIX hdf5
+    DEPENDS ${ampi}
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                     ${PROJECT_SOURCE_DIR}/src/hdf5
+                     ${PROJECT_SOURCE_DIR}/src/hdf5${hdf5_ampi}
                      ${PROJECT_BINARY_DIR}/hdf5
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/hdf5/configure
                       CC=${MPI_C_COMPILER}
                       CFLAGS=${CFLAGS}
                       ${PGCPP}
+                      ${AMPI_RUNSERIAL}
                       --enable-parallel
                       ${HDF5_SHARED}
                       --prefix=${CMAKE_INSTALL_PREFIX}
@@ -548,7 +641,7 @@ endif()
 #### NETCDF ####################################################################
 ## http://www.unidata.ucar.edu/downloads/netcdf/index.jsp
 if (netcdf)
-  if(BUILD_SHARED_LIBS)
+  if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
     set(NETCDF_SHARED "--enable-shared")
   else()
     set(NETCDF_SHARED "--enable-static;--disable-shared;--with-pic")
@@ -559,7 +652,7 @@ if (netcdf)
   endif()
   ExternalProject_Add(
     netcdf
-    DEPENDS ${hdf5}
+    DEPENDS ${hdf5} ${ampi}
     PREFIX netcdf
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                      ${PROJECT_SOURCE_DIR}/src/netcdf
@@ -635,7 +728,7 @@ endif()
 
 ##### Trilinos #################################################################
 ## http://trilinos.sandia.gov
-if(BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=ON")
 else()
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=OFF;-DTPL_FIND_SHARED_LIBS:BOOL=OFF;-DTrilinos_LINK_SEARCH_START_STATIC:BOOL=ON;-DCMAKE_SKIP_INSTALL_RPATH=TRUE")
@@ -664,7 +757,7 @@ endif()
 if(trilinos)
   ExternalProject_Add(
     trilinos
-    DEPENDS ${hdf5} ${netcdf} ${lapack}
+    DEPENDS ${hdf5} ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
@@ -858,6 +951,7 @@ if (hypre)
   ExternalProject_Add(
     hypre
     PREFIX hypre
+    DEPENDS ${ampi}
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/hypre/src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
@@ -904,7 +998,7 @@ endif()
 if(h5part)
   ExternalProject_Add(
     h5part
-    DEPENDS ${hdf5}
+    DEPENDS ${hdf5} ${ampi}
     PREFIX h5part
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                      ${PROJECT_SOURCE_DIR}/src/h5part
@@ -1004,12 +1098,13 @@ if (highwayhash)
   )
 endif()
 
-#### Omega_h is a C++11 library that implements tetrahedron and triangle mesh adaptativity####
+#### Omega_h, tetrahedron and triangle mesh adaptativity #######################
 # https://github.com/ibaned/omega_h
 if (omega_h)
   ExternalProject_Add(
     omega_h
     PREFIX omega_h
+    DEPENDS ${ampi}
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/omega_h
     CMAKE_ARGS -D Omega_h_USE_MPI:BOOL=ON
                -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
