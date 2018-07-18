@@ -75,4 +75,4 @@
 	url = ../../edouarda/brigand.git
 [submodule "src/hdf5-ampi"]
 	path = src/hdf5-ampi
-	url = https://charm.cs.illinois.edu/gerrit/hdf5-ampi
+	url = http://charm.cs.illinois.edu/gerrit/hdf5-ampi
