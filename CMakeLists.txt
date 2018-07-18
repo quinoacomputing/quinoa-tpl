@@ -67,8 +67,6 @@ message(STATUS "Found ${PROCESSOR_COUNT} PEs")
 # Convert system name to lower case
 string(TOLOWER ${CMAKE_SYSTEM_NAME} SYSTEM_NAME)
 
-message(STATUS "------------------------------------------")
-
 # Detect charm
 find_package(Charm)
 if(CHARM_FOUND)
@@ -120,8 +118,20 @@ if (charm)
     if(NOT ENABLE_AMPI)
       set(CHARM_COMM_SUBSYSTEM "mpi")
     else()
-      #set(CHARM_COMM_SUBSYSTEM "netlrts")
-      set(CHARM_COMM_SUBSYSTEM "ofi")
+
+      # AMPI TODO:
+      # - Try charm++ variants listed below
+      # - Link with -memory isomalloc
+      # AMPI status: (add opts via CHARM_EXTRA_ARGS)
+      set(CHARM_COMM_SUBSYSTEM "netlrts") # opts tried: udp, tcp, smp, pxshm
+      # udp, tcp work but slow
+      #set(CHARM_COMM_SUBSYSTEM "ofi")
+      #set(CHARM_COMM_SUBSYSTEM "multicore")
+      #set(CHARM_COMM_SUBSYSTEM "verbs")
+      #  hdf5-ampi: charmun: error attaching to node '127.0.0.1'
+      #set(CHARM_COMM_SUBSYSTEM "sim")
+      #set(CHARM_COMM_SUBSYSTEM "uth")
+
     endif()
 
     set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
@@ -146,7 +156,9 @@ if (charm)
     set(CHARM_COMPILER "clang")
   endif()
 
-  message(STATUS "Charm++ compiler: ${CHARM_COMPILER}")
+  if (CHARM_COMPILER)
+    message(STATUS "Charm++ compiler: ${CHARM_COMPILER}")
+  endif()
 
   # Compilers
   # =========
@@ -194,8 +206,6 @@ if (charm)
   MESSAGE(STATUS "Charmrun: ${CHARM_RUN}")
 
 endif(charm)
-
-message(STATUS "------------------------------------------")
 
 # Compiler-specific settings
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")  # clang-specific settings
@@ -614,7 +624,10 @@ if (hdf5)
   else()
     set(HDF5_SHARED "--disable-shared;--enable-static;--with-pic")
   endif()
-  set(AMPI_RUNSERIAL "RUNSERIAL=\'\'${AMPI_RUN} ++quiet\'\'" )
+  if (ENABLE_AMPI)
+    set(AMPI_RUNSERIAL "RUNSERIAL=\'\'${AMPI_RUN} ++quiet\'\'" )
+    set(AMPI_RUNPARALLEL "RUNPARALLEL=\'\'${AMPI_RUN} ++quiet +p4\'\'" )
+  endif()
   ExternalProject_Add(
     hdf5
     PREFIX hdf5
@@ -627,7 +640,9 @@ if (hdf5)
                       CFLAGS=${CFLAGS}
                       ${PGCPP}
                       ${AMPI_RUNSERIAL}
+                      ${AMPI_RUNPARALLEL}
                       --enable-parallel
+                      --enable-symbols=yes
                       ${HDF5_SHARED}
                       --prefix=${CMAKE_INSTALL_PREFIX}
     BUILD_IN_SOURCE 1
