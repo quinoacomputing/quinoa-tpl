@@ -119,18 +119,19 @@ if (charm)
       set(CHARM_COMM_SUBSYSTEM "mpi")
     else()
 
-      # AMPI TODO:
-      # - Try charm++ variants listed below
-      # - Link with -memory isomalloc
       # AMPI status: (add opts via CHARM_EXTRA_ARGS)
-      set(CHARM_COMM_SUBSYSTEM "netlrts") # opts tried: udp, tcp, smp, pxshm
-      # udp, tcp work but slow
+      # ------------
+      #set(CHARM_COMM_SUBSYSTEM "netlrts") # opts tried: udp, tcp, to try: smp, pxshm
+      # - udp: unittest works but slow; inciter, walker, rngtest immaturely abort
+      # - tcp: unittest works; inciter, walker, rngtest immaturely abort
       #set(CHARM_COMM_SUBSYSTEM "ofi")
-      #set(CHARM_COMM_SUBSYSTEM "multicore")
+      # - hdf5-ampi: mpiexec: Error: unknown option "-pmi_args"
+      set(CHARM_COMM_SUBSYSTEM "multicore")
+      # - works, unittest runs MPI suite, but fails randomlym others immaturely abort
       #set(CHARM_COMM_SUBSYSTEM "verbs")
       #  hdf5-ampi: charmun: error attaching to node '127.0.0.1'
-      #set(CHARM_COMM_SUBSYSTEM "sim")
-      #set(CHARM_COMM_SUBSYSTEM "uth")
+      #set(CHARM_COMM_SUBSYSTEM "sim")  # not attempted
+      #set(CHARM_COMM_SUBSYSTEM "uth")  # not attempted
 
     endif()
 
@@ -141,7 +142,7 @@ if (charm)
     if(NOT ENABLE_AMPI)
       set(CHARM_COMM_SUBSYSTEM "mpi")
     else()
-      set(CHARM_COMM_SUBSYSTEM "gni")
+      set(CHARM_COMM_SUBSYSTEM "gni")   # never tested
     endif()
 
     set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-crayxc")
