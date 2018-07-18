@@ -518,7 +518,6 @@ set(ENABLE_OMEGA_H OFF CACHE BOOL "Enable Omega_h")
 if (ENABLE_OMEGA_H)
 
   if(ENABLE_AMPI)
-    set(OMEGA_H_PREFER_OWN true)
     set(OMEGA_H_ROOT ${CMAKE_INSTALL_PREFIX})
   endif()
   find_package(Omega_h)
