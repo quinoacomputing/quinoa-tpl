@@ -754,7 +754,7 @@ else()
   endif()
 endif()
 if (HOST_OS MATCHES "alpine")
-  set(TRILINOS_ALPINE "-DBLAS_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib;-DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib")
+  set(TRILINOS_ALPINE "-DBLAS_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib;-DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib;-DTrilinos_CXX11_FLAGS=-std=c++11")
 endif()
 if (MKL_FOUND)
   set(TRILINOS_MKL "-DTPL_ENABLE_BLAS=ON;-DTPL_BLAS_LIBRARIES=${MKL_LIBRARIES};-DTPL_LAPACK_LIBRARIES=${MKL_LIBRARIES}")
@@ -775,6 +775,10 @@ if(trilinos)
     DEPENDS ${hdf5} ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
+    # Patch for AMPI build, see
+    # https://github.com/trilinos/Trilinos/pull/3121
+    # https://github.com/trilinos/Trilinos/pull/3122
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/trilinos_ampi.patch
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
                -D TPL_ENABLE_MPI:BOOL=ON
                -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
