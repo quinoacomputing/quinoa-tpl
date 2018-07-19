@@ -581,10 +581,6 @@ if (HOST_OS MATCHES "alpine")
   # To avoid requiring rpc.h on Alpine Linux using musl-libc, see also
   # https://lists.cs.illinois.edu/lists/arc/charm/2016-04/msg00002.html
   set(CHARM_ALPINE "--disable-charmdebug")
-  # Use pthreads and avoid requiring glibc's thread context API, unimplemented
-  # on purpose on Alpine Linux and musl-libc, see also the thread at
-  # http://www.openwall.com/lists/musl/2016/02/04/3
-  set(CHARM_PTHREADS "pthreads")
 endif()
 if (charm)
   ExternalProject_Add(
