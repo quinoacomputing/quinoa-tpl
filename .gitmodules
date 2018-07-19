@@ -64,7 +64,7 @@
 [submodule "src/highwayhash"]
 	path = src/highwayhash
 	url = ../../google/highwayhash.git
-[submodule "omega_h"]
+[submodule "src/omega_h"]
 	path = src/omega_h
 	url = ../../ibaned/omega_h.git
 [submodule "src/brigand"]
