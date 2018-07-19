@@ -619,7 +619,7 @@ endif()
 #### HDF5 ######################################################################
 # http://www.hdfgroup.org/HDF5
 if (hdf5)
-  if(BUILD_SHARED_LIBS)
+  if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
     set(HDF5_SHARED "--enable-shared")
   else()
     set(HDF5_SHARED "--disable-shared;--enable-static;--with-pic")
