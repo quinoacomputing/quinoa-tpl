@@ -21,6 +21,15 @@ disallow_in_source_builds()
 # Set CMAKE_BUILD_TYPE
 include(BuildType)
 
+# Detect operating system type and version
+include(DetectOS)
+detect_os()
+message(STATUS "Detected OS: ${HOST_OS}")
+
+if (HOST_OS MATCHES "alpine" AND ENABLE_AMPI)
+  set(BUILD_SHARED_LIBS off)
+endif()
+
 # Set BUILD_SHARED_LIBS
 include(BuildShared)
 
@@ -37,11 +46,6 @@ include(GNUInstallDirs)
 
 # Set compiler id
 string(TOLOWER "${CMAKE_CXX_COMPILER_ID}" COMP)
-
-# Detect operating system type and version
-include(DetectOS)
-detect_os()
-message(STATUS "Detected OS: ${HOST_OS}")
 
 # Query target architecture
 include(TargetArch)
