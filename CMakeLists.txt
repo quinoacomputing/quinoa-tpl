@@ -719,7 +719,7 @@ endif()
 # http://www.netlib.org/lapack
 if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
   set(LAPACK_BUILD_SHARED_LIBS on)
-endif()
+elseif()
   set(LAPACK_BUILD_SHARED_LIBS off)
 endif()
 if (lapack)
