@@ -451,14 +451,6 @@ else()
   message(STATUS "Zoltan2, SEACASExodus, and Exodiff either not found or AMPI is enabled: will build")
 endif()
 
-# BoostMPLCartesianProduct
-find_package(CartesianProduct)
-if(CARTESIANPRODUCT_FOUND)
-  set(cartesian_product "")
-else()
-  set(cartesian_product "cartesian_product")
-endif()
-
 # Template Unit Test library
 find_package(TUT)
 if(TUT_FOUND)
@@ -554,10 +546,10 @@ endif()
 include(get_compiler_flags)
 get_compiler_flags()
 
-set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut}
-${cartesian_product} ${rngsse2} ${testu01} ${h5part} ${hdf5} ${netcdf}
-${boost} ${pstreams} ${hypre} ${pugixml} ${lapack} ${aec} ${numdiff} ${root}
-${backwardcpp} ${highwayhash} ${omega_h} ${brigand})
+set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut} ${rngsse2}
+${testu01} ${h5part} ${hdf5} ${netcdf} ${boost} ${pstreams} ${hypre} ${pugixml}
+${lapack} ${aec} ${numdiff} ${root} ${backwardcpp} ${highwayhash} ${omega_h}
+${brigand})
 
 list(LENGTH tpls2build ntpl)
 
@@ -865,24 +857,6 @@ if(tut)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/tut/include
                       ${CMAKE_INSTALL_PREFIX}/include/tut
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### Boost.MPL extension: cartesian product ###################################
-# http://www.organicvectory.com/index.php?option=com_content&view=article&id=75:boostmplcartesianproduct&catid=42:boost&Itemid=78
-# Header only
-if(cartesian_product)
-  ExternalProject_Add(
-    cartesian_product
-    PREFIX cartesian_product
-    # Header-only, copy include dir over
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                      ${PROJECT_SOURCE_DIR}/src/cartesian_product/boost/mpl
-                      ${CMAKE_INSTALL_PREFIX}/include/boost/mpl
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
