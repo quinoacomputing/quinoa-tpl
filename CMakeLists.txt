@@ -549,14 +549,6 @@ else()
   set(brigand "brigand")
 endif()
 
-# Detect Brigand
-find_package(Brigand)
-if(Brigand_FOUND)
-  set(brigand "")
-else()
-  set(brigand "brigand")
-endif()
-
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
