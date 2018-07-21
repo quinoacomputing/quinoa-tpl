@@ -10,11 +10,12 @@
 FROM alpine:latest
 
 ARG COMMIT
+ARG ENABLE_AMPI
 
 RUN apk update && apk add autoconf automake libtool bash grep m4 perl zlib-dev git cmake make gfortran gcc g++ libexecinfo-dev
 
 ADD https://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-3.1.1.tar.gz /openmpi/
-RUN cd /openmpi/ && tar xzf openmpi-3.1.1.tar.gz && cd openmpi-3.1.1 && ./configure --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install
+RUN if [ "$ENABLE_AMPI" = false ]; then cd /openmpi/ && tar xzf openmpi-3.1.1.tar.gz && cd openmpi-3.1.1 && ./configure --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install ; fi
 ENV PATH /opt/openmpi/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/openmpi/lib:$LD_LIBRARY_PATH
 RUN rm -rf /openmpi
@@ -23,11 +24,9 @@ RUN rm -rf /openmpi
 # https://lists.cs.illinois.edu/lists/arc/charm/2016-05/msg00013.html
 RUN ln -s /usr/bin/cpp /lib/cpp
 
-RUN addgroup quinoa
-RUN adduser -S quinoa quinoa
-RUN chown -R quinoa:quinoa /home/quinoa
+RUN addgroup quinoa && adduser -S quinoa quinoa && chown -R quinoa:quinoa /home/quinoa
 USER quinoa
 WORKDIR /home/quinoa
 
 RUN git clone --recursive http://github.com/quinoacomputing/quinoa-tpl.git
-RUN cd quinoa-tpl && git checkout $COMMIT && git submodule init && git submodule update --recursive && git submodule status --recursive && mkdir -p build && cd build && cmake -DENABLE_OMEGA_H=true .. && make -sj$(grep -c processor /proc/cpuinfo)
+RUN cd quinoa-tpl && git checkout $COMMIT && git submodule init && git submodule update --recursive && git submodule status --recursive && mkdir -p build && cd build && cmake -DENABLE_AMPI=$ENABLE_AMPI .. && make -sj$(grep -c processor /proc/cpuinfo)
