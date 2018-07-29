@@ -717,6 +717,11 @@ endif()
 
 #### lapack ####################################################################
 # http://www.netlib.org/lapack
+if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
+  set(LAPACK_BUILD_SHARED_LIBS on)
+elseif()
+  set(LAPACK_BUILD_SHARED_LIBS off)
+endif()
 if (lapack)
   ExternalProject_Add(
     lapack
@@ -726,7 +731,7 @@ if (lapack)
                -D CMAKE_Fortran_COMPILER:PATH=${UNDERLYING_Fortran_COMPILER}
                -D CMAKE_Fortran_FLAGS:STRING=${FFLAGS}
                -D BUILD_TESTING:BOOL=OFF
-               -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+               -D BUILD_SHARED_LIBS:BOOL=${LAPACK_BUILD_SHARED_LIBS}
                -D LAPACKE:BOOL=ON
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                ${MACOSX_RPATH}
@@ -760,9 +765,13 @@ if (MKL_FOUND)
 else()
   if(BLAS_FOUND)
     set(TRILINOS_BLAS -DTPL_BLAS_LIBRARIES=${BLAS_LIBRARIES})
+  else()
+    set(TRILINOS_BLAS -DBLAS_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib)
   endif()
   if(LAPACKE_FOUND)
-    set(TRILINOS_LAPACK -DTPL_LAPACK_LIBRARIES=${LAPACK_LIBRARIES})
+    set(TRILINOS_LAPACK -DTPL_LAPACK_LIBRARIES=${LAPACKE_LIBRARIES})
+  else()
+    set(TRILINOS_LAPACK -DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib)
   endif()
 endif()
 if(trilinos)
