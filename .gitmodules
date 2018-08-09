@@ -5,9 +5,6 @@
 [submodule "src/boost"]
 	path = src/boost
 	url = ../../quinoacomputing/Boost.git
-[submodule "src/cartesian_product"]
-	path = src/cartesian_product
-	url = ../../quinoacomputing/BoostMPLCartesianProduct.git
 [submodule "src/charm"]
 	path = src/charm
 #	url = http://charm.cs.uiuc.edu/gerrit/charm
