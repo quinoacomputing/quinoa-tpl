@@ -541,6 +541,14 @@ else()
   set(brigand "brigand")
 endif()
 
+# Doxygen
+find_package(Doxygen 1.8.15)
+if(DOXYGEN_FOUND)
+  set(doxygen "")
+else()
+  set(doxygen "doxygen")
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -549,7 +557,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut} ${rngsse2}
 ${testu01} ${h5part} ${hdf5} ${netcdf} ${boost} ${pstreams} ${hypre} ${pugixml}
 ${lapack} ${aec} ${numdiff} ${root} ${backwardcpp} ${highwayhash} ${omega_h}
-${brigand})
+${brigand} ${doxygen})
 
 list(LENGTH tpls2build ntpl)
 
@@ -1139,5 +1147,26 @@ if (brigand)
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
+  )
+endif()
+
+#### Doxygen ####################################################################
+# https://doxygen.org
+if (doxygen)
+  ExternalProject_Add(
+    doxygen
+    PREFIX doxygen
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/doxygen
+    CMAKE_ARGS -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
+               -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
+               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
+               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+               -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+               -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    LOG_DOWNLOAD 1
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
   )
 endif()

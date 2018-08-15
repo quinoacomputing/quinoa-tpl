@@ -73,3 +73,6 @@
 [submodule "src/root"]
 	path = src/root
 	url = ../../root-project/root.git
+[submodule "src/doxygen"]
+	path = src/doxygen
+	url = ../../doxygen/doxygen
