@@ -549,6 +549,14 @@ else()
   set(doxygen "doxygen")
 endif()
 
+# m.css
+find_package(MCSS)
+if(MCSS_FOUND)
+  set(mcss "")
+else()
+  set(mcss "mcss")
+endif()
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -557,7 +565,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut} ${rngsse2}
 ${testu01} ${h5part} ${hdf5} ${netcdf} ${boost} ${pstreams} ${hypre} ${pugixml}
 ${lapack} ${aec} ${numdiff} ${root} ${backwardcpp} ${highwayhash} ${omega_h}
-${brigand} ${doxygen})
+${brigand} ${doxygen} ${mcss})
 
 list(LENGTH tpls2build ntpl)
 
@@ -1106,6 +1114,7 @@ if (highwayhash)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/highwayhash/highwayhash
                       ${CMAKE_INSTALL_PREFIX}/include/highwayhash
+    LOG_CONFIGURE 1
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
@@ -1132,7 +1141,7 @@ if (omega_h)
   )
 endif()
 
-#### Brigand ####################################################################
+#### Brigand ###################################################################
 # https://github.com/edouarda/brigand
 # Header only, only if not found
 if (brigand)
@@ -1143,14 +1152,13 @@ if (brigand)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/brigand/include/brigand
                       ${CMAKE_INSTALL_PREFIX}/include/brigand
-    CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
   )
 endif()
 
-#### Doxygen ####################################################################
+#### Doxygen, documentation generation #########################################
 # https://doxygen.org
 if (doxygen)
   ExternalProject_Add(
@@ -1168,5 +1176,22 @@ if (doxygen)
     LOG_CONFIGURE 1
     LOG_BUILD 1
     LOG_INSTALL 1
+  )
+endif()
+
+#### m.css, modern, mobile-friendly doxygen output #############################
+# http://mcss.mosra.cz
+if (mcss)
+  ExternalProject_Add(
+    mcss
+    PREFIX mcss
+    # Copy over what's needed to run dox2html5.py
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/m.css
+                      ${CMAKE_INSTALL_PREFIX}/m.css
+    LOG_CONFIGURE 1
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DOWNLOAD_COMMAND ""
   )
 endif()

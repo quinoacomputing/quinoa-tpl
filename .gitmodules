@@ -76,3 +76,6 @@
 [submodule "src/doxygen"]
 	path = src/doxygen
 	url = ../../doxygen/doxygen
+[submodule "src/m.css"]
+	path = src/m.css
+	url = ../../mosra/m.css
