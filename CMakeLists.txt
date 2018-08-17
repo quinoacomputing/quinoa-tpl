@@ -217,6 +217,10 @@ MESSAGE(STATUS "Underlying Fortran compiler: " ${UNDERLYING_Fortran_COMPILER})
 
 MESSAGE(STATUS "Charmrun: ${CHARM_RUN}")
 
+if (CHARM_EXTRA_ARGS)
+  MESSAGE(STATUS "Charm++ extra build args (CHARM_EXTRA_ARGS): ${CHARM_EXTRA_ARGS}")
+endif()
+
 # Compiler-specific settings
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")  # clang-specific settings
 
