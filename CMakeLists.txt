@@ -165,56 +165,57 @@ if (charm)
     message(STATUS "Charm++ compiler: ${CHARM_COMPILER}")
   endif()
 
-  # Compilers
-  # =========
-  # There are two sets of compilers, given by the following CMake variables:
-  #
-  # 1. The underlying compiler suite
-  #    UNDERLYING_C_COMPILER
-  #    UNDERLYING_CXX_COMPILER
-  #    UNDERLYING_Fortran_COMPILER
-  #
-  # 2. The MPI wrappers (of the underlying compilers)
-  #    MPI_C_COMPILER
-  #    MPI_CXX_COMPILER
-  #    MPI_Fortran_COMPILER
-
-  # Find MPI and get its underlying compilers. If a traditional MPI (e.g.,
-  # OpenMPI) is used, the get_mpi_compilers cmake function uses the built-in
-  # CMake functionality to find the MPI wrappers and based on the wrappers
-  # detects the underyling compilers. If Charm++'s Adaptive MPI (AMPI) is used,
-  # the Charm++ TPL build builds Charm++ as well as AMPI and we use the AMPI
-  # wrappers to build MPI libraries.
-  set(ampi "${charm}")  # used as a dependency for MPI libs
-  set(ENABLE_AMPI OFF CACHE BOOL "Enable AMPI")
-  if(NOT ENABLE_AMPI)
-    include(MPICompilers)
-    get_mpi_compilers()
-    set(CHARM_BUILD_TARGET "charm++")
-    set(ampi "")
-    set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
-  else()
-    set(MPI_C_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampicc")
-    set(MPI_CXX_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampicxx")
-    set(MPI_Fortran_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampif90")
-    set(AMPI_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/ampirun")
-    set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
-    set(UNDERLYING_C_COMPILER "${CMAKE_C_COMPILER}")
-    set(UNDERLYING_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
-    set(UNDERLYING_Fortran_COMPILER "${CMAKE_Fortran_COMPILER}")
-    set(CHARM_BUILD_TARGET "AMPI")
-    MESSAGE(STATUS "MPI C compiler: " ${MPI_C_COMPILER})
-    MESSAGE(STATUS "MPI C++ compiler: " ${MPI_CXX_COMPILER})
-    MESSAGE(STATUS "MPI Fortran compiler: " ${MPI_Fortran_COMPILER})
-    MESSAGE(STATUS "Underlying C compiler: " ${UNDERLYING_C_COMPILER})
-    MESSAGE(STATUS "Underlying C++ compiler: " ${UNDERLYING_CXX_COMPILER})
-    MESSAGE(STATUS "Underlying Fortran compiler: " ${UNDERLYING_Fortran_COMPILER})
-    MESSAGE(STATUS "AMPIrun: ${AMPI_RUN}")
-  endif()
-
-  MESSAGE(STATUS "Charmrun: ${CHARM_RUN}")
-
 endif(charm)
+
+# Compilers
+# =========
+# There are two sets of compilers, given by the following CMake variables:
+#
+# 1. The underlying compiler suite
+#    UNDERLYING_C_COMPILER
+#    UNDERLYING_CXX_COMPILER
+#    UNDERLYING_Fortran_COMPILER
+#
+# 2. The MPI wrappers (of the underlying compilers)
+#    MPI_C_COMPILER
+#    MPI_CXX_COMPILER
+#    MPI_Fortran_COMPILER
+
+# Find MPI and get its underlying compilers. If a traditional MPI (e.g.,
+# OpenMPI) is used, the get_mpi_compilers cmake function uses the built-in
+# CMake functionality to find the MPI wrappers and based on the wrappers
+# detects the underyling compilers. If Charm++'s Adaptive MPI (AMPI) is used,
+# the Charm++ TPL build builds Charm++ as well as AMPI and we use the AMPI
+# wrappers to build MPI libraries.
+set(ampi "${charm}")  # used as a dependency for MPI libs
+set(ENABLE_AMPI OFF CACHE BOOL "Enable AMPI")
+if(NOT ENABLE_AMPI)
+  include(MPICompilers)
+  get_mpi_compilers()
+  set(CHARM_BUILD_TARGET "charm++")
+  set(ampi "")
+  set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
+else()
+  set(MPI_C_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampicc")
+  set(MPI_CXX_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampicxx")
+  set(MPI_Fortran_COMPILER "${CMAKE_INSTALL_PREFIX}/charm/bin/ampif90")
+  set(AMPI_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/ampirun")
+  set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
+  set(UNDERLYING_C_COMPILER "${CMAKE_C_COMPILER}")
+  set(UNDERLYING_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
+  set(UNDERLYING_Fortran_COMPILER "${CMAKE_Fortran_COMPILER}")
+  set(CHARM_BUILD_TARGET "AMPI")
+  MESSAGE(STATUS "AMPIrun: ${AMPI_RUN}")
+endif()
+
+MESSAGE(STATUS "MPI C compiler: " ${MPI_C_COMPILER})
+MESSAGE(STATUS "MPI C++ compiler: " ${MPI_CXX_COMPILER})
+MESSAGE(STATUS "MPI Fortran compiler: " ${MPI_Fortran_COMPILER})
+MESSAGE(STATUS "Underlying C compiler: " ${UNDERLYING_C_COMPILER})
+MESSAGE(STATUS "Underlying C++ compiler: " ${UNDERLYING_CXX_COMPILER})
+MESSAGE(STATUS "Underlying Fortran compiler: " ${UNDERLYING_Fortran_COMPILER})
+
+MESSAGE(STATUS "Charmrun: ${CHARM_RUN}")
 
 # Compiler-specific settings
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")  # clang-specific settings
