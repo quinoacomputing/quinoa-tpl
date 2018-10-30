@@ -233,7 +233,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")  # clang-specific settings
   endif()
 
   # Don't error out on functions not returning anything even when supposed to,
-  # required only by TestU01 
+  # required only by TestU01
   set(CFLAGS "${CFLAGS} -Wno-error=return-type")
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")  # gcc-specific settings
@@ -274,72 +274,87 @@ endif()
 # Attempt to find some TPLs on the system
 
 # HDF5
-set(HDF5_PREFER_PARALLEL true)
-if(NOT BUILD_SHARED_LIBS)
-  set(HDF5_USE_STATIC_LIBRARIES true)
-endif()
-if(ENABLE_AMPI)
-  set(HDF5_ROOT ${CMAKE_INSTALL_PREFIX})
-endif()
-find_package(HDF5 COMPONENTS C HL)
+set(ENABLE_HDF5 ON CACHE BOOL "Enable HDF5")
+if (ENABLE_HDF5)
 
-if ((ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL AND
-     HDF5_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-    (NOT ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL))
-  set(hdf5 "")
-  set(hdf5_include_dirs_flags "${HDF5_INCLUDE_DIRS}")
-  string(REGEX REPLACE "([^;]+)" "CPPFLAGS=-I\\1" hdf5_include_dirs_flags
-         "${hdf5_include_dirs_flags}")
-  set(hdf5_library_dirs "${HDF5_LIBRARIES}")
-  list(GET HDF5_LIBRARIES 0 hdf5_root)  # get the first item of cmake list
-  get_filename_component(hdf5_root_last ${hdf5_root} NAME)
-  get_filename_component(hdf5_root ${hdf5_root} DIRECTORY )
-  set(hdf5_library_dirs_flags "${hdf5_root}")
-  string(REGEX REPLACE "([^;]+)" "LDFLAGS=-L\\1" hdf5_library_dirs_flags
-        "${hdf5_library_dirs_flags}")
-  set(hdf5_library_dirs_flags "${hdf5_library_dirs_flags}/lib")
-  # strip "/lib" and "/lib64"
-  if ("${hdf5_root}" MATCHES "lib(64)?$")
-    get_filename_component(hdf5_root ${hdf5_root} DIRECTORY)
+  set(HDF5_PREFER_PARALLEL true)
+  if(NOT BUILD_SHARED_LIBS)
+    set(HDF5_USE_STATIC_LIBRARIES true)
   endif()
-else()
-  message(STATUS "HDF5 either not found, not parallel, disabled, or AMPI is enabled: will build")
-  set(hdf5 "hdf5")
-  set(hdf5_ampi "-ampi")
-  set(hdf5_include_dirs_flags "CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/include")
-  set(hdf5_library_dirs_flags "LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/lib")
-  set(hdf5_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
-  set(hdf5_root "${CMAKE_INSTALL_PREFIX}")
+  if(ENABLE_AMPI)
+    set(HDF5_ROOT ${CMAKE_INSTALL_PREFIX})
+  endif()
+  find_package(HDF5 COMPONENTS C HL)
+
+  if ((ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL AND
+       HDF5_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+      (NOT ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL))
+    set(hdf5 "")
+    set(hdf5_include_dirs_flags "${HDF5_INCLUDE_DIRS}")
+    string(REGEX REPLACE "([^;]+)" "CPPFLAGS=-I\\1" hdf5_include_dirs_flags
+           "${hdf5_include_dirs_flags}")
+    set(hdf5_library_dirs "${HDF5_LIBRARIES}")
+    list(GET HDF5_LIBRARIES 0 hdf5_root)  # get the first item of cmake list
+    get_filename_component(hdf5_root_last ${hdf5_root} NAME)
+    get_filename_component(hdf5_root ${hdf5_root} DIRECTORY )
+    set(hdf5_library_dirs_flags "${hdf5_root}")
+    string(REGEX REPLACE "([^;]+)" "LDFLAGS=-L\\1" hdf5_library_dirs_flags
+          "${hdf5_library_dirs_flags}")
+    set(hdf5_library_dirs_flags "${hdf5_library_dirs_flags}/lib")
+    # strip "/lib" and "/lib64"
+    if ("${hdf5_root}" MATCHES "lib(64)?$")
+      get_filename_component(hdf5_root ${hdf5_root} DIRECTORY)
+    endif()
+  else()
+    message(STATUS "HDF5 either not found, not parallel, disabled, or AMPI is enabled: will build")
+    set(hdf5 "hdf5")
+    set(hdf5_ampi "-ampi")
+    set(hdf5_include_dirs_flags "CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/include")
+    set(hdf5_library_dirs_flags "LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/lib")
+    set(hdf5_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
+    set(hdf5_root "${CMAKE_INSTALL_PREFIX}")
+  endif()
+
 endif()
 
 # NetCDF
-if(ENABLE_AMPI)
-  set(NETCDF_ROOT ${CMAKE_INSTALL_PREFIX})
-endif()
-find_package(NetCDF)
+set(ENABLE_NETCDF ON CACHE BOOL "Enable NetCDF")
+if (ENABLE_NETCDF)
 
-if ((ENABLE_AMPI AND NETCDF_FOUND AND
-     NETCDF_INCLUDES MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-    (NOT ENABLE_AMPI AND NETCDF_FOUND))
-  set(netcdf "")
-  set(netcdf_include_dirs "${NETCDF_INCLUDES}")
-  set(netcdf_library_dirs "${NETCDF_LIBRARY_DIRS}")
-else()
-  set(netcdf "netcdf")
-  message(STATUS "NetCDF either not found or AMPI is enabled: will build")
-  set(netcdf_include_dirs "${CMAKE_INSTALL_PREFIX}/include")
-  set(netcdf_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
+  if(ENABLE_AMPI)
+    set(NETCDF_ROOT ${CMAKE_INSTALL_PREFIX})
+  endif()
+  find_package(NetCDF)
+
+  if ((ENABLE_AMPI AND NETCDF_FOUND AND
+       NETCDF_INCLUDES MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+      (NOT ENABLE_AMPI AND NETCDF_FOUND))
+    set(netcdf "")
+    set(netcdf_include_dirs "${NETCDF_INCLUDES}")
+    set(netcdf_library_dirs "${NETCDF_LIBRARY_DIRS}")
+  else()
+    set(netcdf "netcdf")
+    message(STATUS "NetCDF either not found or AMPI is enabled: will build")
+    set(netcdf_include_dirs "${CMAKE_INSTALL_PREFIX}/include")
+    set(netcdf_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
+  endif()
+
 endif()
 
 # Boost
-if(NOT BUILD_SHARED_LIBS)
-  set(Boost_USE_STATIC_LIBS true)
-endif()
-find_package(Boost 1.56.0)
-if(Boost_FOUND)
-  set(boost "")
-else()
-  set(boost "boost")
+set(ENABLE_BOOST ON CACHE BOOL "Enable Boost")
+if (ENABLE_BOOST)
+
+  if(NOT BUILD_SHARED_LIBS)
+    set(Boost_USE_STATIC_LIBS true)
+  endif()
+  find_package(Boost 1.56.0)
+  if(Boost_FOUND)
+    set(boost "")
+  else()
+    set(boost "boost")
+  endif()
+
 endif()
 
 # PStreams
@@ -351,18 +366,23 @@ else()
 endif()
 
 # Hypre
-if(ENABLE_AMPI)
-  set(HYPRE_ROOT ${CMAKE_INSTALL_PREFIX})
-endif()
-find_package(Hypre 2.9.0)
+set(ENABLE_HYPRE ON CACHE BOOL "Enable Hypre")
+if (ENABLE_HYPRE)
 
-if ((ENABLE_AMPI AND HYPRE_FOUND AND
-     HYPRE_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-    (NOT ENABLE_AMPI AND HYPRE_FOUND))
-  set(hypre "")
-else()
-  set(hypre "hypre")
-  message(STATUS "Hypre either not found or AMPI is enabled: will build")
+  if(ENABLE_AMPI)
+    set(HYPRE_ROOT ${CMAKE_INSTALL_PREFIX})
+  endif()
+  find_package(Hypre 2.9.0)
+
+  if ((ENABLE_AMPI AND HYPRE_FOUND AND
+       HYPRE_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+      (NOT ENABLE_AMPI AND HYPRE_FOUND))
+    set(hypre "")
+  else()
+    set(hypre "hypre")
+    message(STATUS "Hypre either not found or AMPI is enabled: will build")
+  endif()
+
 endif()
 
 # Pugixml
@@ -435,25 +455,35 @@ else()
 endif()
 
 # TestU01
-find_package(TestU01)
-if(TestU01_FOUND)
-  set(testu01 "")
-else()
-  set(testu01 "testu01")
+set(ENABLE_TESTU01 ON CACHE BOOL "Enable TestU01")
+if (ENABLE_TESTU01)
+
+  find_package(TestU01)
+  if(TestU01_FOUND)
+    set(testu01 "")
+  else()
+    set(testu01 "testu01")
+  endif()
+
 endif()
 
 # Trilinos
-find_package(Zoltan2 QUIET)
-find_package(SEACASExodus QUIET)
-find_package(Exodiff QUIET)
+set(ENABLE_TRILINOS ON CACHE BOOL "Enable Trilinos")
+if (ENABLE_TRILINOS)
 
-if ((ENABLE_AMPI AND Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND AND
-     Zoltan2_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-    (NOT ENABLE_AMPI AND Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND))
-  set(trilinos "")
-else()
-  set(trilinos "trilinos")
-  message(STATUS "Zoltan2, SEACASExodus, and Exodiff either not found or AMPI is enabled: will build")
+  find_package(Zoltan2 QUIET)
+  find_package(SEACASExodus QUIET)
+  find_package(Exodiff QUIET)
+
+  if ((ENABLE_AMPI AND Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND AND
+       Zoltan2_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+      (NOT ENABLE_AMPI AND Zoltan2_FOUND AND SEACASExodus_FOUND AND Exodiff_FOUND))
+    set(trilinos "")
+  else()
+    set(trilinos "trilinos")
+    message(STATUS "Zoltan2, SEACASExodus, and Exodiff either not found or AMPI is enabled: will build")
+  endif()
+
 endif()
 
 # Template Unit Test library
@@ -479,7 +509,7 @@ endif()
 
 # Root
 set(ENABLE_ROOT OFF CACHE BOOL "Enable ROOT")
-if(ENABLE_ROOT)
+if (ENABLE_ROOT)
   find_package(Root COMPONENTS RIO Core Tree Hist)
   if(Root_FOUND)
     set(root "")
@@ -547,19 +577,29 @@ else()
 endif()
 
 # Doxygen
-find_package(Doxygen 1.8.15)
-if(DOXYGEN_FOUND)
-  set(doxygen "")
-else()
-  set(doxygen "doxygen")
+set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
+if (ENABLE_DOXYGEN)
+
+  find_package(Doxygen 1.8.15)
+  if(DOXYGEN_FOUND)
+    set(doxygen "")
+  else()
+    set(doxygen "doxygen")
+  endif()
+
 endif()
 
 # m.css
-find_package(MCSS)
-if(MCSS_FOUND)
-  set(mcss "")
-else()
-  set(mcss "mcss")
+set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
+if (ENABLE_MCSS)
+
+  find_package(MCSS)
+  if(MCSS_FOUND)
+    set(mcss "")
+  else()
+    set(mcss "mcss")
+  endif()
+
 endif()
 
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
@@ -959,7 +999,7 @@ if (pstreams)
   ExternalProject_Add(
     pstreams
     PREFIX pstreams
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E make_directory 
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E make_directory
                       ${CMAKE_INSTALL_PREFIX}/include/pstreams
     BUILD_COMMAND ${CMAKE_COMMAND} -E copy
                   ${PROJECT_SOURCE_DIR}/src/pstreams/pstream.h
