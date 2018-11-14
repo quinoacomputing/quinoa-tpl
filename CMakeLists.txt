@@ -236,12 +236,15 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")  # clang-specific settings
   # required only by TestU01
   set(CFLAGS "${CFLAGS} -Wno-error=return-type")
 
+  # Detect compiler version
+  include(DetectCompilerVersion)
+
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")  # gcc-specific settings
 
   # Gnu will use libstdc++ by default. We do not offer libc++.
 
   # Detect compiler version
-  include(DetectCXXversion)
+  include(DetectCompilerVersion)
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")  # intel-specific settings
 
