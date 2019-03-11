@@ -841,10 +841,6 @@ if(trilinos)
     DEPENDS ${hdf5} ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
-    # Patch for AMPI build, see
-    # https://github.com/trilinos/Trilinos/pull/3121
-    # https://github.com/trilinos/Trilinos/pull/3122
-    PATCH_COMMAND patch -p1 -t < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/trilinos_ampi.patch
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
                -D TPL_ENABLE_MPI:BOOL=ON
                -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
