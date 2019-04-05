@@ -71,12 +71,145 @@ message(STATUS "Found ${PROCESSOR_COUNT} PEs")
 # Convert system name to lower case
 string(TOLOWER ${CMAKE_SYSTEM_NAME} SYSTEM_NAME)
 
-# Detect charm
-find_package(Charm)
-if(CHARM_FOUND)
-  set(charm "")
-else()
-  set(charm "charm")
+# Set which libraries are built/searched by default
+set(ENABLE_CHARM ON CACHE BOOL "Enable Charm++")
+set(ENABLE_HDF5 ON CACHE BOOL "Enable HDF5")
+set(ENABLE_NETCDF ON CACHE BOOL "Enable NetCDF")
+set(ENABLE_BOOST ON CACHE BOOL "Enable Boost")
+set(ENABLE_PSTREAMS ON CACHE BOOL "Enable Pstreams")
+set(ENABLE_PUGIXML ON CACHE BOOL "Enable PugiXML")
+set(ENABLE_PEGTL ON CACHE BOOL "Enable PEGTL")
+set(ENABLE_RANDOM123 ON CACHE BOOL "Enable Random123")
+set(ENABLE_RNGSSE2 ON CACHE BOOL "Enable RNGSSE2")
+set(ENABLE_LAPACK ON CACHE BOOL "Enable LAPACK")
+set(ENABLE_AEC ON CACHE BOOL "Enable AEC")
+set(ENABLE_H5PART ON CACHE BOOL "Enable H5Part")
+set(ENABLE_TESTU01 ON CACHE BOOL "Enable TestU01")
+set(ENABLE_TRILINOS ON CACHE BOOL "Enable Trilinos")
+set(ENABLE_TUT ON CACHE BOOL "Enable TUT")
+set(ENABLE_NUMDIFF ON CACHE BOOL "Enable NumDiff")
+set(ENABLE_ROOT OFF CACHE BOOL "Enable Root")
+set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
+set(ENABLE_HYGHWAYHASH ON CACHE BOOL "Enable HyghwayHash")
+set(ENABLE_OMEGAH OFF CACHE BOOL "Enable Omega_H")
+set(ENABLE_BRIGAND ON CACHE BOOL "Enable Brigand")
+set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
+set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
+
+# Set default requested executable targets
+set(REQUESTED_EXECUTABLES unittest inciter rngtest meshconv walker fileconv)
+
+# If a *_ONLY variable is set, user only wants specific executable(s)
+if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
+    WALKER_ONLY OR FILECONV_ONLY)
+
+  # Turn everything off first
+  set(ENABLE_CHARM OFF)
+  set(ENABLE_HDF5 OFF)
+  set(ENABLE_NETCDF OFF)
+  set(ENABLE_BOOST OFF)
+  set(ENABLE_PSTREAMS OFF)
+  set(ENABLE_PUGIXML OFF)
+  set(ENABLE_PEGTL OFF)
+  set(ENABLE_RANDOM123)
+  set(ENABLE_RNGSSE2 OFF)
+  set(ENABLE_LAPACK OFF)
+  set(ENABLE_AEC OFF)
+  set(ENABLE_H5PART OFF)
+  set(ENABLE_TESTU01 OFF)
+  set(ENABLE_TRILINOS OFF)
+  set(ENABLE_TUT OFF)
+  set(ENABLE_NUMDIFF OFF)
+  set(ENABLE_ROOT OFF)
+  set(ENABLE_BACKWARDCPP OFF)
+  set(ENABLE_HYGHWAYHASH OFF)
+  set(ENABLE_OMEGAH OFF)
+  set(ENABLE_BRIGAND OFF)
+  set(ENABLE_DOXYGEN OFF)
+  set(ENABLE_MCSS OFF)
+  set(REQUESTED_EXECUTABLES)
+
+  # Turn on prerequisites for executable targets configured, these blocks
+  # should be consistent with the bottom of TPLs.cmake.
+
+  if (UNITTEST_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES unittest)
+    set(ENABLE_CHARM ON)
+    set(ENABLE_PUGIXML ON)
+    set(ENABLE_TRILINOS ON)
+    set(ENABLE_HDF5 ON)
+    set(ENABLE_TUT ON)
+    set(ENABLE_PEGTL ON)
+    set(ENABLE_BOOST ON)
+    set(ENABLE_LAPACK ON)
+  endif()
+
+  if (INCITER_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES inciter)
+    set(ENABLE_CHARM ON)
+    set(ENABLE_TRILINOS ON)
+    set(ENABLE_HDF5 ON)
+    set(ENABLE_BRIGAND ON)
+    set(ENABLE_PEGTL ON)
+    set(ENABLE_LAPACK ON)
+    set(ENABLE_BOOST ON)
+  endif()
+
+  if (RNGTEST_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES rngtest)
+    set(ENABLE_CHARM ON)
+    set(ENABLE_TESTU01 ON)
+    set(ENABLE_BRIGAND ON)
+    set(ENABLE_PEGTL ON)
+    set(ENABLE_RANDOM123 ON)
+    set(ENABLE_BOOST ON)
+    set(ENABLE_LAPACK ON)
+  endif()
+
+  if (MESHCONV_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES meshconv)
+    set(ENABLE_CHARM ON)
+    set(ENABLE_TRILINOS ON)
+    set(ENABLE_PEGTL ON)
+    set(ENABLE_PUGIXML ON)
+    set(ENABLE_HDF5 ON)
+    set(ENABLE_BOOST ON)
+    set(ENABLE_BRIGAND ON)
+  endif()
+
+  if (WALKER_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES walker)
+    set(ENABLE_CHARM ON)
+    set(ENABLE_TRILINOS ON)
+    set(ENABLE_PEGTL ON)
+    set(ENABLE_BRIGAND ON)
+    set(ENABLE_HDF5 ON)
+    set(ENABLE_RANDOM123 ON)
+    set(ENABLE_BOOST ON)
+    set(ENABLE_LAPACK ON)
+  endif()
+
+  if (FILECONV_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES fileconv)
+    set(ENABLE_CHARM ON)
+    set(ENABLE_TRILINOS ON)
+    set(ENABLE_ROOT ON)
+    set(ENABLE_PEGTL ON)
+    set(ENABLE_PUGIXML ON)
+    set(ENABLE_HDF5 ON)
+    set(ENABLE_BOOST ON)
+  endif()
+
+endif()
+
+# Charm++
+if (ENABLE_CHARM)
+  find_package(Charm)
+  if(CHARM_FOUND)
+    set(charm "")
+  else()
+    set(charm "charm")
+  endif()
 endif()
 
 # If we are to build our own Charm++, setup prerequisites for its build command
@@ -277,9 +410,7 @@ endif()
 # Attempt to find some TPLs on the system
 
 # HDF5
-set(ENABLE_HDF5 ON CACHE BOOL "Enable HDF5")
 if (ENABLE_HDF5)
-
   set(HDF5_PREFER_PARALLEL true)
   if(NOT BUILD_SHARED_LIBS)
     set(HDF5_USE_STATIC_LIBRARIES true)
@@ -288,7 +419,6 @@ if (ENABLE_HDF5)
     set(HDF5_ROOT ${CMAKE_INSTALL_PREFIX})
   endif()
   find_package(HDF5 COMPONENTS C HL)
-
   if ((ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL AND
        HDF5_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
       (NOT ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL))
@@ -317,18 +447,14 @@ if (ENABLE_HDF5)
     set(hdf5_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
     set(hdf5_root "${CMAKE_INSTALL_PREFIX}")
   endif()
-
 endif()
 
 # NetCDF
-set(ENABLE_NETCDF ON CACHE BOOL "Enable NetCDF")
 if (ENABLE_NETCDF)
-
   if(ENABLE_AMPI)
     set(NETCDF_ROOT ${CMAKE_INSTALL_PREFIX})
   endif()
   find_package(NetCDF)
-
   if ((ENABLE_AMPI AND NETCDF_FOUND AND
        NETCDF_INCLUDES MATCHES ${CMAKE_INSTALL_PREFIX}) OR
       (NOT ENABLE_AMPI AND NETCDF_FOUND))
@@ -341,13 +467,10 @@ if (ENABLE_NETCDF)
     set(netcdf_include_dirs "${CMAKE_INSTALL_PREFIX}/include")
     set(netcdf_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
   endif()
-
 endif()
 
 # Boost
-set(ENABLE_BOOST ON CACHE BOOL "Enable Boost")
 if (ENABLE_BOOST)
-
   if(NOT BUILD_SHARED_LIBS)
     set(Boost_USE_STATIC_LIBS true)
   endif()
@@ -357,123 +480,113 @@ if (ENABLE_BOOST)
   else()
     set(boost "boost")
   endif()
-
 endif()
 
 # PStreams
-find_package(PStreams)
-if(PSTREAMS_FOUND)
-  set(pstreams "")
-else()
-  set(pstreams "pstreams")
-endif()
-
-# Hypre
-set(ENABLE_HYPRE ON CACHE BOOL "Enable Hypre")
-if (ENABLE_HYPRE)
-
-  if(ENABLE_AMPI)
-    set(HYPRE_ROOT ${CMAKE_INSTALL_PREFIX})
-  endif()
-  find_package(Hypre 2.9.0)
-
-  if ((ENABLE_AMPI AND HYPRE_FOUND AND
-       HYPRE_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-      (NOT ENABLE_AMPI AND HYPRE_FOUND))
-    set(hypre "")
+if (ENABLE_PSTREAMS)
+  find_package(PStreams)
+  if(PSTREAMS_FOUND)
+    set(pstreams "")
   else()
-    set(hypre "hypre")
-    message(STATUS "Hypre either not found or AMPI is enabled: will build")
+    set(pstreams "pstreams")
   endif()
-
 endif()
 
 # Pugixml
-find_package(Pugixml)
-if(PUGIXML_FOUND)
-  set(pugixml "")
-else()
-  set(pugixml "pugixml")
-endif()
-
-# PEGTL
-find_package(PEGTL 2.0.0)
-if(PEGTL_FOUND)
-  set(pegtl "")
-else()
-  set(pegtl "pegtl")
-endif()
-
-# Random123
-find_package(Random123)
-if(Random123_FOUND)
-  set(random123 "")
-else()
-  set(random123 "random123")
-endif()
-
-# Do not attempt to build RNGSSE2 if target architecture is not x86
-find_package(RNGSSE2)
-if(RNGSSE2_FOUND OR NOT ARCH MATCHES "x86")
-  set(rngsse2 "")
-else()
-  set(rngsse2 "rngsse2")
-endif()
-
-# blas and lapack
-set(lapack "lapack")
-find_package(MKL)     # Prefer MKL if found
-if(MKL_FOUND)
-  set(lapack "")
-else()
-  find_package(BLAS)
-  find_package(LAPACKE)
-  if(LAPACKE_FOUND)
-    set(lapack "")
+if (ENABLE_PUGIXML)
+  find_package(Pugixml)
+  if(PUGIXML_FOUND)
+    set(pugixml "")
+  else()
+    set(pugixml "pugixml")
   endif()
 endif()
 
-# AEC (only for static link)
-if(NOT BUILD_SHARED_LIBS)
-  set(aec "aec")
-  find_package(AEC)
-  if(AEC_FOUND)
-    set(aec "")
+# PEGTL
+if (ENABLE_PEGTL)
+  find_package(PEGTL 2.0.0)
+  if(PEGTL_FOUND)
+    set(pegtl "")
+  else()
+    set(pegtl "pegtl")
+  endif()
+endif()
+
+# Random123
+if (ENABLE_RANDOM123)
+  find_package(Random123)
+  if(Random123_FOUND)
+    set(random123 "")
+  else()
+    set(random123 "random123")
+  endif()
+endif()
+
+# RNGSSE2
+if (ENABLE_RNGSSE2)
+  # Do not attempt to build RNGSSE2 if target architecture is not x86
+  find_package(RNGSSE2)
+  if(RNGSSE2_FOUND OR NOT ARCH MATCHES "x86")
+    set(rngsse2 "")
+  else()
+    set(rngsse2 "rngsse2")
+  endif()
+endif()
+
+# BLAS and LAPACK
+if (ENABLE_LAPACK)
+  set(lapack "lapack")
+  find_package(MKL)     # Prefer MKL if found
+  if(MKL_FOUND)
+    set(lapack "")
+  else()
+    find_package(BLAS)
+    find_package(LAPACKE)
+    if(LAPACKE_FOUND)
+      set(lapack "")
+    endif()
+  endif()
+endif()
+
+# AEC
+if (ENABLE_AEC)
+  if(NOT BUILD_SHARED_LIBS)  # only for static link)
+    set(aec "aec")
+    find_package(AEC)
+    if(AEC_FOUND)
+      set(aec "")
+    endif()
   endif()
 endif()
 
 # H5Part
-if(ENABLE_AMPI)
-  set(H5PART_ROOT ${CMAKE_INSTALL_PREFIX})
-endif()
-find_package(H5Part)
-
-if ((ENABLE_AMPI AND H5Part_FOUND AND
-     H5PART_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-    (NOT ENABLE_AMPI AND H5Part_FOUND))
-  set(h5part "")
-else()
-  set(h5part "h5part")
-  message(STATUS "H5Part either not found or AMPI is enabled: will build")
+if (ENABLE_H5PART)
+  if(ENABLE_AMPI)
+    set(H5PART_ROOT ${CMAKE_INSTALL_PREFIX})
+  endif()
+  find_package(H5Part)
+  if ((ENABLE_AMPI AND H5Part_FOUND AND
+       H5PART_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+      (NOT ENABLE_AMPI AND H5Part_FOUND))
+    set(h5part "")
+  else()
+    set(h5part "h5part")
+    message(STATUS "H5Part either not found or AMPI is enabled: will build")
+  endif()
 endif()
 
 # TestU01
-set(ENABLE_TESTU01 ON CACHE BOOL "Enable TestU01")
 if (ENABLE_TESTU01)
-
   find_package(TestU01)
   if(TestU01_FOUND)
     set(testu01 "")
   else()
     set(testu01 "testu01")
   endif()
-
 endif()
 
 # Trilinos
-set(ENABLE_TRILINOS ON CACHE BOOL "Enable Trilinos")
 if (ENABLE_TRILINOS)
-
   find_package(Zoltan2 QUIET)
   find_package(SEACASExodus QUIET)
   find_package(Exodiff QUIET)
@@ -486,32 +599,34 @@ if (ENABLE_TRILINOS)
     set(trilinos "trilinos")
     message(STATUS "Zoltan2, SEACASExodus, and Exodiff either not found or AMPI is enabled: will build")
   endif()
-
 endif()
 
 # Template Unit Test library
-find_package(TUT)
-if(TUT_FOUND)
-  set(tut "")
-else()
-  set(tut "tut")
+if (ENABLE_TUT)
+  find_package(TUT)
+  if(TUT_FOUND)
+    set(tut "")
+  else()
+    set(tut "tut")
+  endif()
 endif()
 
-# Zlib, only for static link and only on ppc64
+# Zlib, only for static link and only on ppc64 (we don't build it)
 if(ARCH MATCHES "ppc64")
  find_package(ZLIB REQUIRED)
 endif()
 
 # NumDiff
-find_package(NumDiff)
-if(NumDiff_FOUND)
-  set(numdiff "")
-else()
-  set(numdiff "numdiff")
+if (ENABLE_NUMDIFF)
+  find_package(NumDiff)
+  if(NumDiff_FOUND)
+    set(numdiff "")
+  else()
+    set(numdiff "numdiff")
+  endif()
 endif()
 
 # Root
-set(ENABLE_ROOT OFF CACHE BOOL "Enable ROOT")
 if (ENABLE_ROOT)
   find_package(Root COMPONENTS RIO Core Tree Hist)
   if(Root_FOUND)
@@ -533,7 +648,6 @@ if (ENABLE_ROOT)
 endif()
 
 # Backward-cpp
-set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
 if (ENABLE_BACKWARDCPP)
   find_package(BackwardCpp)
   if(BACKWARDCPP_FOUND)
@@ -544,22 +658,21 @@ if (ENABLE_BACKWARDCPP)
 endif()
 
 # Highwayhash
-find_package(HighwayHash)
-if(HighwayHash_FOUND)
-  set(highwayhash "")
-else()
-  set(highwayhash "highwayhash")
+if (ENABLE_HYGHWAYHASH)
+  find_package(HighwayHash)
+  if(HighwayHash_FOUND)
+    set(highwayhash "")
+  else()
+    set(highwayhash "highwayhash")
+  endif()
 endif()
 
 # Omega_h
-set(ENABLE_OMEGA_H OFF CACHE BOOL "Enable Omega_h")
 if (ENABLE_OMEGA_H)
-
   if(ENABLE_AMPI)
     set(OMEGA_H_ROOT ${CMAKE_INSTALL_PREFIX})
   endif()
   find_package(Omega_h)
-
   if ((ENABLE_AMPI AND Omega_h_FOUND AND
        OMEGA_H_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
       (NOT ENABLE_AMPI AND Omega_h_FOUND))
@@ -568,41 +681,36 @@ if (ENABLE_OMEGA_H)
     set(omega_h "omega_h")
     message(STATUS "Omega_h either not found or AMPI is enabled: will build")
   endif()
-
 endif()
 
 # Brigand
-find_package(Brigand)
-if(Brigand_FOUND)
-  set(brigand "")
-else()
-  set(brigand "brigand")
+if (ENABLE_BRIGAND)
+  find_package(Brigand)
+  if(Brigand_FOUND)
+    set(brigand "")
+  else()
+    set(brigand "brigand")
+  endif()
 endif()
 
 # Doxygen
-set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
 if (ENABLE_DOXYGEN)
-
   find_package(Doxygen 1.8.15)
   if(DOXYGEN_FOUND)
     set(doxygen "")
   else()
     set(doxygen "doxygen")
   endif()
-
 endif()
 
 # m.css
-set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
 if (ENABLE_MCSS)
-
   find_package(MCSS)
   if(MCSS_FOUND)
     set(mcss "")
   else()
     set(mcss "mcss")
   endif()
-
 endif()
 
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
@@ -610,16 +718,16 @@ endif()
 include(get_compiler_flags)
 get_compiler_flags()
 
-set(tpls2build ${charm} ${trilinos} ${pegtl} ${random123} ${tut} ${rngsse2}
-${testu01} ${h5part} ${hdf5} ${netcdf} ${boost} ${pstreams} ${hypre} ${pugixml}
-${lapack} ${aec} ${numdiff} ${root} ${backwardcpp} ${highwayhash} ${omega_h}
-${brigand} ${doxygen} ${mcss})
+set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pstreams}
+${pugixml} ${pegtl} ${random123} ${rngsse2} ${lapack} ${aec} ${h5part}
+${testu01} ${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
+${omega_h} ${brigand} ${doxygen} ${mcss})
 
 list(LENGTH tpls2build ntpl)
 
 # Output TPLs to be built
 if (tpls2build)
-  message(STATUS "Will build the following ${ntpl} TPLs: ${tpls2build}")
+  message(STATUS "Will build the following ${ntpl} TPLs for executable(s) ${REQUESTED_EXECUTABLES}: ${tpls2build}")
 else()
   message(STATUS "All TPLs found. No need to build.")
 endif()
@@ -1005,29 +1113,6 @@ if (pstreams)
                   ${CMAKE_INSTALL_PREFIX}/include/pstreams
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### Hypre #####################################################################
-# http://computation.llnl.gov/project/linear_solvers/software.php
-if (hypre)
-  ExternalProject_Add(
-    hypre
-    PREFIX hypre
-    DEPENDS ${ampi}
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/hypre/src
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
-               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
-               -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
-               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
-               ${MACOSX_RPATH}
-               -D HYPRE_SHARED:BOOL=${BUILD_SHARED_LIBS}
-               -D HYPRE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
   )
 endif()
 
