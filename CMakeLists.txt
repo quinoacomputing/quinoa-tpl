@@ -1,7 +1,10 @@
 ################################################################################
 #
 # \file      CMakeLists.txt
-# \copyright 2012-2015, J. Bakosi, 2016-2017, Los Alamos National Security, LLC.
+# \copyright 2012-2015 J. Bakosi,
+#            2016-2018 Los Alamos National Security, LLC.,
+#            2019 Triad National Security, LLC.
+#            All rights reserved. See the LICENSE file for details.
 # \brief     Build quinoa third-party Libraries
 #
 ################################################################################
@@ -1003,7 +1006,7 @@ if(trilinos)
 endif()
 
 #### PEGTL (Parsing Expression Grammar Template Library) #######################
-# https://github.com/ColinH/PEGTL
+# https://github.com/taocpp/PEGTL
 # Header only
 if (pegtl)
  ExternalProject_Add(
@@ -1191,7 +1194,7 @@ if(h5part)
 endif()
 
 #### NumDiff ###################################################################
-# http://svn.cern.ch/guest/madx/trunk/madX/tools/numdiff
+# https://github.com/MethodicalAcceleratorDesign/MAD-X/tree/master/tools/numdiff
 if(numdiff)
   ExternalProject_Add(
     numdiff
@@ -1268,7 +1271,7 @@ if (highwayhash)
 endif()
 
 #### Omega_h, tetrahedron and triangle mesh adaptativity #######################
-# https://github.com/ibaned/omega_h
+# https://github.com/SNLComputation/omega_h
 if (omega_h)
   ExternalProject_Add(
     omega_h
