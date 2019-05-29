@@ -727,6 +727,8 @@ endif()
 
 # m.css
 if (ENABLE_MCSS)
+  # Find Python: required for m.css
+  find_package(PythonInterp 3.6)
   find_package(MCSS)
   if(MCSS_FOUND)
     set(mcss "")
