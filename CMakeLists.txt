@@ -824,6 +824,8 @@ if (hdf5)
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                      ${PROJECT_SOURCE_DIR}/src/hdf5${hdf5_ampi}
                      ${PROJECT_BINARY_DIR}/hdf5
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5
+    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/hdf5/configure
                       CC=${MPI_C_COMPILER}
                       CFLAGS=${CFLAGS}
@@ -836,6 +838,7 @@ if (hdf5)
                       --prefix=${CMAKE_INSTALL_PREFIX}
     BUILD_IN_SOURCE 1
     LOG_DOWNLOAD 1
+    LOG_PATCH 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
     LOG_INSTALL 1
