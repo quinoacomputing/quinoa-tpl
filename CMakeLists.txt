@@ -808,6 +808,9 @@ endif()
 #### HDF5 ######################################################################
 # http://www.hdfgroup.org/HDF5
 if (hdf5)
+  if(BUILD_SHARED_LIBS)
+    set(HDF5_PATCH "patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch")
+  endif()
   if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
     set(HDF5_SHARED "--enable-shared")
   else()
@@ -825,7 +828,7 @@ if (hdf5)
                      ${PROJECT_SOURCE_DIR}/src/hdf5${hdf5_ampi}
                      ${PROJECT_BINARY_DIR}/hdf5
     SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5
-    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch
+    PATCH_COMMAND ${HDF5_PATCH}
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/hdf5/configure
                       CC=${MPI_C_COMPILER}
                       CFLAGS=${CFLAGS}
@@ -834,12 +837,10 @@ if (hdf5)
                       ${AMPI_RUNPARALLEL}
                       --enable-parallel
                       --enable-symbols=yes
-                      --disable-tests
                       ${HDF5_SHARED}
                       --prefix=${CMAKE_INSTALL_PREFIX}
     BUILD_IN_SOURCE 1
     LOG_DOWNLOAD 1
-    LOG_PATCH 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
     LOG_INSTALL 1
