@@ -812,6 +812,9 @@ if (hdf5)
     set(HDF5_SHARED "--enable-shared")
   else()
     set(HDF5_SHARED "--disable-shared;--enable-static;--with-pic")
+    set(HDF5_PATCH
+        "SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5
+         PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch")
   endif()
   if (ENABLE_AMPI)
     set(AMPI_RUNSERIAL "RUNSERIAL=\'\'${AMPI_RUN} ++quiet\'\'" )
@@ -824,8 +827,7 @@ if (hdf5)
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                      ${PROJECT_SOURCE_DIR}/src/hdf5${hdf5_ampi}
                      ${PROJECT_BINARY_DIR}/hdf5
-    SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5
-    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch
+    ${HDF5_PATCH}
     CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/hdf5/configure
                       CC=${MPI_C_COMPILER}
                       CFLAGS=${CFLAGS}
