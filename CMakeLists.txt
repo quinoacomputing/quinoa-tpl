@@ -808,7 +808,7 @@ endif()
 #### HDF5 ######################################################################
 # http://www.hdfgroup.org/HDF5
 if (hdf5)
-  if(BUILD_SHARED_LIBS)
+  if(NOT BUILD_SHARED_LIBS)
     set(HDF5_PATCH "patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch")
   endif()
   if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
