@@ -775,6 +775,8 @@ if (HOST_OS MATCHES "alpine")
   set(CHARM_ALPINE "--disable-charmdebug")
 endif()
 if (charm)
+  set(CHARM_CXXFLAGS "${CXXFLAGS}")
+  string(REPLACE " " ";" CHARM_CXXFLAGS "${CHARM_CXXFLAGS}")
   ExternalProject_Add(
     charm
     PREFIX charm
@@ -797,7 +799,7 @@ if (charm)
                   ${CHARM_RELEASE_BUILD}
                   ${CHARM_ALPINE}
                   -j${PROCESSOR_COUNT}
-                  ${CXXFLAGS}
+                  ${CHARM_CXXFLAGS}
     CONFIGURE_COMMAND ""
     INSTALL_COMMAND ""
     LOG_CONFIGURE 1
