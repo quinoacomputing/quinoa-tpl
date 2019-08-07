@@ -1233,6 +1233,8 @@ if(root)
                -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
+               -Ddavix=OFF
+               -D cxx17:BOOL=true
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                -Dimt=OFF
