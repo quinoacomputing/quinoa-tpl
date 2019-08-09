@@ -402,9 +402,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")  # intel-specific settings
   # Include function that allows to set standard C++ library
   include(libstdcxx)
 
-  # Offer switch between libc++ and libstdc++, using libc++ as default
+  # Offer switch between libc++ and libstdc++, using libstdc++ as default
   if (LIBCXX_FOUND)
-    set_libstdcpp_vs_libcpp(CXXFLAGS "libc++")
+    set_libstdcpp_vs_libcpp(CXXFLAGS "libstdc++")
   endif()
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")  # pgi-specific settings
