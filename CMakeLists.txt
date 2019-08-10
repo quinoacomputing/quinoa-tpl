@@ -554,7 +554,12 @@ endif()
 # BLAS and LAPACK
 if (ENABLE_LAPACK)
   set(lapack "lapack")
-  find_package(MKL)     # Prefer MKL if found
+  if (NOT MATHLIB)        # set default
+    set(MATHLIB mkl)
+  endif()
+  if (MATHLIB STREQUAL mkl OR MATHLIB STREQUAL MKL)
+    find_package(MKL)     # Prefer MKL if found
+  endif()
   if(MKL_FOUND)
     set(lapack "")
   else()
