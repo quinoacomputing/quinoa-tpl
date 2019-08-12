@@ -7,6 +7,9 @@
 #            2019 Triad National Security, LLC.
 #            All rights reserved. See the LICENSE file for details.
 # \brief     Dockerfile for testing the third-party libraries build for Quinoa
+# \details   Starting from an alpine distribution, we install the
+#            absolute minimum system-wide packages that allow building all
+#            third-party libraries.
 #
 ################################################################################
 
