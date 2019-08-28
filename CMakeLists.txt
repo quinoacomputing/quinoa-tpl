@@ -425,6 +425,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")  # pgi-specific settings
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Cray")  # cray-specific settings
 
+else()
+
+  message(WARNING "Compiler '${CMAKE_CXX_COMPILER_ID}' could not be identified.")
+
 endif()
 
 # Mac OS X specifics
