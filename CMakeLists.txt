@@ -764,6 +764,7 @@ ${testu01} ${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
 ${omega_h} ${brigand} ${doxygen} ${mcss})
 
 list(LENGTH tpls2build ntpl)
+list(SORT tpls2build)
 
 # Output TPLs to be built
 if (tpls2build)
