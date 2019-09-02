@@ -20,8 +20,8 @@ ARG ENABLE_AMPI
 
 RUN apk update && apk add autoconf automake libtool bash grep m4 perl zlib-dev git cmake make gfortran gcc g++ libexecinfo-dev patch python flex bison
 
-ADD http://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-3.1.1.tar.gz /openmpi/
-RUN if [ "$ENABLE_AMPI" = false ]; then cd /openmpi/ && tar xzf openmpi-3.1.1.tar.gz && cd openmpi-3.1.1 && ./configure --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install ; fi
+ADD http://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-3.1.4.tar.gz /openmpi/
+RUN if [ "$ENABLE_AMPI" = false ]; then cd /openmpi/ && tar xzf openmpi-3.1.4.tar.gz && cd openmpi-3.1.4 && ./configure --prefix=/opt/openmpi && make -sj$(grep -c processor /proc/cpuinfo) install ; fi
 ENV PATH /opt/openmpi/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/openmpi/lib:$LD_LIBRARY_PATH
 RUN rm -rf /openmpi
