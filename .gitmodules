@@ -14,7 +14,7 @@
 	url = ../../quinoacomputing/H5Part.git
 [submodule "src/hdf5"]
 	path = src/hdf5
-	url = ../../quinoacomputing/HDF5.git
+	url = ../../live-clones/hdf5.git
 [submodule "src/hypre"]
 	path = src/hypre
 	url = ../../quinoacomputing/HYPRE.git
