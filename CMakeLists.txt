@@ -29,10 +29,6 @@ include(DetectOS)
 detect_os()
 message(STATUS "Detected OS: ${HOST_OS}")
 
-if (HOST_OS MATCHES "alpine" AND ENABLE_AMPI)
-  set(BUILD_SHARED_LIBS off)
-endif()
-
 # Set BUILD_SHARED_LIBS
 include(BuildShared)
 
