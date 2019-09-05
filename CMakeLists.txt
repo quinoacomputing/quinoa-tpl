@@ -797,7 +797,7 @@ if (charm)
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/charm
                       ${CMAKE_INSTALL_PREFIX}/charm
-    # Will apply patch in SOURCE_DIR which is the same as install dir
+    # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
     SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Build in install dir and leave stuff there - no install step
     BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
@@ -993,6 +993,7 @@ if(trilinos)
     DEPENDS ${hdf5} ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
+    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/exodiff_cstdint.patch
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
                -D TPL_ENABLE_MPI:BOOL=ON
                -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
