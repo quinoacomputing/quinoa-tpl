@@ -92,6 +92,7 @@ set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
 set(ENABLE_HIGHWAYHASH ON CACHE BOOL "Enable HighwayHash")
 set(ENABLE_OMEGAH OFF CACHE BOOL "Enable Omega_H")
 set(ENABLE_BRIGAND ON CACHE BOOL "Enable Brigand")
+set(ENABLE_SOL2 ON CACHE BOOL "Enable Sol2")
 set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
 set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
 
@@ -124,6 +125,7 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
   set(ENABLE_HIGHWAYHASH OFF)
   set(ENABLE_OMEGAH OFF)
   set(ENABLE_BRIGAND OFF)
+  set(ENABLE_SOL2 OFF)
   set(ENABLE_DOXYGEN OFF)
   set(ENABLE_MCSS OFF)
   set(REQUESTED_EXECUTABLES)
@@ -157,6 +159,7 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
     set(ENABLE_HDF5 ON)
     set(ENABLE_HIGHWAYHASH ON)
     set(ENABLE_BRIGAND ON)
+    set(ENABLE_SOL2 ON)
     set(ENABLE_PEGTL ON)
     set(ENABLE_LAPACK ON)
     set(ENABLE_BOOST ON)
@@ -724,6 +727,17 @@ if (ENABLE_BRIGAND)
   endif()
 endif()
 
+# Sol2
+if (ENABLE_SOL2)
+  find_package(Lua)
+  find_package(Sol2)
+  if(SOL2_FOUND)
+    set(sol2 "")
+  else()
+    set(sol2 "sol2")
+  endif()
+endif()
+
 # Doxygen
 if (ENABLE_DOXYGEN)
   find_package(Doxygen 1.8.15)
@@ -758,7 +772,7 @@ get_compiler_flags()
 set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pstreams}
 ${pugixml} ${pegtl} ${random123} ${rngsse2} ${lapack} ${aec} ${h5part}
 ${testu01} ${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
-${omega_h} ${brigand} ${doxygen} ${mcss})
+${omega_h} ${brigand} ${sol2} ${doxygen} ${mcss})
 
 list(LENGTH tpls2build ntpl)
 list(SORT tpls2build)
@@ -1327,6 +1341,23 @@ if (brigand)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/brigand/include/brigand
                       ${CMAKE_INSTALL_PREFIX}/include/brigand
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DOWNLOAD_COMMAND ""
+  )
+endif()
+
+#### Sol2 ######################################################################
+# https://github.com/ThePhD/sol2
+# Header only, only if not found
+if (sol2)
+  ExternalProject_Add(
+    sol2
+    PREFIX sol2
+    # Header-only, copy include dir over
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/sol2/include/sol
+                      ${CMAKE_INSTALL_PREFIX}/include/sol
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""

@@ -79,3 +79,6 @@
 [submodule "src/m.css"]
 	path = src/m.css
 	url = ../../mosra/m.css
+[submodule "src/sol2"]
+	path = src/sol2
+	url = https://github.com/ThePhD/sol2.git
