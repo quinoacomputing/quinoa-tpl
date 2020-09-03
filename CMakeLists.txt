@@ -1263,7 +1263,7 @@ if(root)
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
                -Ddavix=OFF
-               -D cxx17:BOOL=true
+               -D CMAKE_CXX_STANDARD=17
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                -Dimt=OFF
