@@ -82,3 +82,6 @@
 [submodule "src/sol2"]
 	path = src/sol2
 	url = https://github.com/ThePhD/sol2.git
+[submodule "src/exam2m"]
+	path = src/exam2m
+	url = https://github.com/Charmworks/ExaM2M.git
