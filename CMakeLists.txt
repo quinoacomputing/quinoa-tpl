@@ -1415,7 +1415,7 @@ if (exam2m)
     exam2m
     PREFIX exam2m
     DEPENDS ${charm} ${brigand} ${hdf5} ${netcdf} ${highwayhash} ${trilinos}
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/exam2m
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/exam2m/src
     CMAKE_ARGS -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
