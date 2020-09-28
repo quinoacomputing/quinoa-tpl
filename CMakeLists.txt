@@ -1107,7 +1107,6 @@ if(tut)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/tut/include
                       ${CMAKE_INSTALL_PREFIX}/include/tut
-    CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
