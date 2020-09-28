@@ -1167,7 +1167,6 @@ if (boost)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/boost/boost
                       ${CMAKE_INSTALL_PREFIX}/include/boost/
-    CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
