@@ -791,10 +791,10 @@ ${testu01} ${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
 ${omega_h} ${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
 
 list(LENGTH tpls2build ntpl)
-list(SORT tpls2build)
 
 # Output TPLs to be built
 if (tpls2build)
+  list(SORT tpls2build)
   message(STATUS "Will build the following ${ntpl} TPLs for executable(s) ${REQUESTED_EXECUTABLES}: ${tpls2build}")
 else()
   message(STATUS "All TPLs found. No need to build.")
