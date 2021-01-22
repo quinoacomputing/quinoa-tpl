@@ -519,7 +519,7 @@ endif()
 
 # PStreams
 if (ENABLE_PSTREAMS)
-  find_package(PStreams)
+  find_package(Pstreams)
   if(PSTREAMS_FOUND)
     set(pstreams "")
   else()
