@@ -828,6 +828,7 @@ if (charm)
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/charm
                       ${CMAKE_INSTALL_PREFIX}/charm
+    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/charm_mac.patch
     # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
     SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Build in install dir and leave stuff there - no install step
