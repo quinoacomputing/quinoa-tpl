@@ -69,7 +69,7 @@
 	url = ../../edouarda/brigand.git
 [submodule "src/hdf5-ampi"]
 	path = src/hdf5-ampi
-	url = http://charm.cs.illinois.edu/gerrit/hdf5-ampi
+	url = ../../UIUC-PPL/hdf5-ampi
 [submodule "src/root"]
 	path = src/root
 	url = ../../root-project/root.git
@@ -81,7 +81,7 @@
 	url = ../../mosra/m.css
 [submodule "src/sol2"]
 	path = src/sol2
-	url = https://github.com/ThePhD/sol2.git
+	url = ../../ThePhD/sol2.git
 [submodule "src/exam2m"]
 	path = src/exam2m
-	url = https://github.com/Charmworks/ExaM2M.git
+	url = ../../Charmworks/ExaM2M.git
