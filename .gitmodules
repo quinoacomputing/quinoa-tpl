@@ -69,7 +69,7 @@
 	url = ../../edouarda/brigand.git
 [submodule "src/hdf5-ampi"]
 	path = src/hdf5-ampi
-	url = ../../UIUC-PPL/hdf5-ampi
+	url = ../../UIUC-PPL/hdf5-ampi.git
 [submodule "src/root"]
 	path = src/root
 	url = ../../root-project/root.git
