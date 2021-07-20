@@ -833,7 +833,7 @@ if (charm)
     # Build in install dir and leave stuff there - no install step
     BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Build Charm++
-    BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/build
+    BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/buildold
                   ${CHARM_BUILD_TARGET}
                   ${CHARM_ARCHITECTURE}
                   ${CHARM_EXTRA_ARGS}
