@@ -826,8 +826,8 @@ if (charm)
     PREFIX charm
     # Move unpacked tarball to install dir and build there
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                      ${PROJECT_SOURCE_DIR}/src/charm
-                      ${CMAKE_INSTALL_PREFIX}/charm
+                     ${PROJECT_SOURCE_DIR}/src/charm
+                     ${CMAKE_INSTALL_PREFIX}/charm
     # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
     SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Build in install dir and leave stuff there - no install step
