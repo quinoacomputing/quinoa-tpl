@@ -13,7 +13,7 @@
 #
 ################################################################################
 
-FROM debian:stable
+FROM debian:buster
 
 ARG COMMIT
 ARG ENABLE_AMPI
