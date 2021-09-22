@@ -1024,6 +1024,7 @@ if(trilinos)
     DEPENDS ${hdf5} ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
+    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/exodiff_cstdint.patch
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
                -D TPL_ENABLE_MPI:BOOL=ON
                -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
