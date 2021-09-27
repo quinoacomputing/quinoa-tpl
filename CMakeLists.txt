@@ -129,7 +129,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
   set(ENABLE_SOL2 OFF)
   set(ENABLE_DOXYGEN OFF)
   set(ENABLE_MCSS OFF)
-  set(ENABLE_EXAM2M OFF)
   set(REQUESTED_EXECUTABLES)
 
   # Turn on prerequisites for executable targets configured, these blocks
