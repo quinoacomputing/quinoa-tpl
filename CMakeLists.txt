@@ -313,10 +313,12 @@ if (charm)
 
   message(STATUS "Charm++ architecture/version: ${CHARM_ARCHITECTURE}")
 
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Cray")  # cray-specific settings
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Cray")
     set(CHARM_COMPILER "craycc")
   elseif (ENABLE_AMPI AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     set(CHARM_COMPILER "clang")
+  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    set(CHARM_COMPILER "icc")
   endif()
 
   if (CHARM_COMPILER)
