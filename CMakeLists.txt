@@ -240,9 +240,6 @@ endif()
 # If we are to build our own Charm++, setup prerequisites for its build command
 if (charm)
 
-  # Use mpi wrappers by default
-  set(CHARM_COMPILER "")
-
   # Match Charm++ build architecture for system architecture detected
   if(ARCH MATCHES "x86_64")
 
@@ -317,8 +314,11 @@ if (charm)
     set(CHARM_COMPILER "craycc")
   elseif (ENABLE_AMPI AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     set(CHARM_COMPILER "clang")
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    set(CHARM_COMPILER "icc")
+  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" AND
+          "${CMAKE_CXX_COMPILER}" MATCHES "mpiicpc")
+      set(CHARM_COMPILER "icc") # intel mpi + intel compiler
+  else()
+    set(CHARM_COMPILER "")  # use mpi wrappers by default
   endif()
 
   if (CHARM_COMPILER)
