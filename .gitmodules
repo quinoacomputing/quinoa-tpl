@@ -55,6 +55,7 @@
 [submodule "cmake"]
 	path = cmake
 	url = ../../quinoacomputing/cmake-modules.git
+  branch = inciter
 [submodule "src/backward-cpp"]
 	path = src/backward-cpp
 	url = ../../bombela/backward-cpp.git
