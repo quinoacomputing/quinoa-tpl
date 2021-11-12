@@ -1,7 +1,3 @@
-[submodule "src/aec"]
-	path = src/aec
-#	url = https://gitlab.dkrz.de/k202009/libaec.git
-	url = ../../erget/libaec.git
 [submodule "src/boost"]
 	path = src/boost
 	url = ../../quinoacomputing/Boost.git
@@ -40,12 +36,6 @@
 [submodule "src/random123"]
 	path = src/random123
 	url = ../../quinoacomputing/Random123.git
-[submodule "src/rngsse2"]
-	path = src/rngsse2
-	url = ../../quinoacomputing/RNGSSE2.git
-[submodule "src/testu01"]
-	path = src/testu01
-	url = ../../quinoacomputing/TestU01-threadsafe.git
 [submodule "src/trilinos"]
 	path = src/trilinos
 	url = ../../trilinos/Trilinos.git
@@ -62,18 +52,12 @@
 [submodule "src/highwayhash"]
 	path = src/highwayhash
 	url = ../../google/highwayhash.git
-[submodule "src/omega_h"]
-	path = src/omega_h
-	url = ../../SNLComputation/omega_h.git
 [submodule "src/brigand"]
 	path = src/brigand
 	url = ../../edouarda/brigand.git
 [submodule "src/hdf5-ampi"]
 	path = src/hdf5-ampi
 	url = ../../UIUC-PPL/hdf5-ampi.git
-[submodule "src/root"]
-	path = src/root
-	url = ../../root-project/root.git
 [submodule "src/doxygen"]
 	path = src/doxygen
 	url = ../../doxygen/doxygen

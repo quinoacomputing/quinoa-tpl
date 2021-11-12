@@ -79,11 +79,9 @@ set(ENABLE_PSTREAMS ON CACHE BOOL "Enable Pstreams")
 set(ENABLE_PUGIXML ON CACHE BOOL "Enable PugiXML")
 set(ENABLE_PEGTL ON CACHE BOOL "Enable PEGTL")
 set(ENABLE_RANDOM123 ON CACHE BOOL "Enable Random123")
-set(ENABLE_RNGSSE2 ON CACHE BOOL "Enable RNGSSE2")
 set(ENABLE_LAPACK ON CACHE BOOL "Enable LAPACK")
 set(ENABLE_AEC ON CACHE BOOL "Enable AEC")
 set(ENABLE_H5PART ON CACHE BOOL "Enable H5Part")
-set(ENABLE_TESTU01 ON CACHE BOOL "Enable TestU01")
 set(ENABLE_TRILINOS ON CACHE BOOL "Enable Trilinos")
 set(ENABLE_TUT ON CACHE BOOL "Enable TUT")
 set(ENABLE_NUMDIFF ON CACHE BOOL "Enable NumDiff")
@@ -98,11 +96,10 @@ set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
 set(ENABLE_EXAM2M OFF CACHE BOOL "Enable ExaM2M")
 
 # Set default requested executable targets
-set(REQUESTED_EXECUTABLES unittest inciter rngtest meshconv walker fileconv)
+set(REQUESTED_EXECUTABLES unittest inciter meshconv)
 
 # If a *_ONLY variable is set, user only wants specific executable(s)
-if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
-    WALKER_ONLY OR FILECONV_ONLY)
+if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
 
   # Turn everything off first
   set(ENABLE_CHARM OFF)
@@ -117,7 +114,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
   set(ENABLE_LAPACK OFF)
   set(ENABLE_AEC OFF)
   set(ENABLE_H5PART OFF)
-  set(ENABLE_TESTU01 OFF)
   set(ENABLE_TRILINOS OFF)
   set(ENABLE_TUT OFF)
   set(ENABLE_NUMDIFF OFF)
@@ -166,18 +162,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
     set(ENABLE_NUMDIFF ON)
   endif()
 
-  if (RNGTEST_ONLY)
-    list(APPEND REQUESTED_EXECUTABLES rngtest)
-    set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
-    set(ENABLE_TESTU01 ON)
-    set(ENABLE_BRIGAND ON)
-    set(ENABLE_PEGTL ON)
-    set(ENABLE_RANDOM123 ON)
-    set(ENABLE_BOOST ON)
-    set(ENABLE_LAPACK ON)
-  endif()
-
   if (MESHCONV_ONLY)
     list(APPEND REQUESTED_EXECUTABLES meshconv)
     set(ENABLE_CHARM ON)
@@ -191,38 +175,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
     set(ENABLE_BRIGAND ON)
     set(ENABLE_HIGHWAYHASH ON)
     set(ENABLE_NUMDIFF ON)
-  endif()
-
-  if (WALKER_ONLY)
-    list(APPEND REQUESTED_EXECUTABLES walker)
-    set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
-    set(ENABLE_TRILINOS ON)
-    set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
-    set(ENABLE_PEGTL ON)
-    set(ENABLE_BRIGAND ON)
-    set(ENABLE_RANDOM123 ON)
-    set(ENABLE_BOOST ON)
-    set(ENABLE_LAPACK ON)
-    set(ENABLE_NUMDIFF ON)
-    set(ENABLE_HIGHWAYHASH ON)
-    set(ENABLE_H5PART ON)
-  endif()
-
-  if (FILECONV_ONLY)
-    list(APPEND REQUESTED_EXECUTABLES fileconv)
-    set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
-    set(ENABLE_TRILINOS ON)
-    set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
-    set(ENABLE_ROOT ON)
-    set(ENABLE_PEGTL ON)
-    set(ENABLE_PUGIXML ON)
-    set(ENABLE_BOOST ON)
-    set(ENABLE_BRIGAND ON)
-    set(ENABLE_HIGHWAYHASH ON)
   endif()
 
 endif()
@@ -558,17 +510,6 @@ if (ENABLE_RANDOM123)
   endif()
 endif()
 
-# RNGSSE2
-if (ENABLE_RNGSSE2)
-  # Do not attempt to build RNGSSE2 if target architecture is not x86
-  find_package(RNGSSE2)
-  if(RNGSSE2_FOUND OR NOT ARCH MATCHES "x86")
-    set(rngsse2 "")
-  else()
-    set(rngsse2 "rngsse2")
-  endif()
-endif()
-
 # BLAS and LAPACK
 if (ENABLE_LAPACK)
   set(lapack "lapack")
@@ -613,16 +554,6 @@ if (ENABLE_H5PART)
   else()
     set(h5part "h5part")
     message(STATUS "H5Part either not found or AMPI is enabled: will build")
-  endif()
-endif()
-
-# TestU01
-if (ENABLE_TESTU01)
-  find_package(TestU01)
-  if(TestU01_FOUND)
-    set(testu01 "")
-  else()
-    set(testu01 "testu01")
   endif()
 endif()
 
@@ -787,8 +718,8 @@ include(get_compiler_flags)
 get_compiler_flags()
 
 set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pstreams}
-${pugixml} ${pegtl} ${random123} ${rngsse2} ${lapack} ${aec} ${h5part}
-${testu01} ${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
+${pugixml} ${pegtl} ${random123}  ${lapack} ${aec} ${h5part}
+${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
 ${omega_h} ${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
 
 list(LENGTH tpls2build ntpl)
@@ -1111,49 +1042,6 @@ if(tut)
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### RNGSSELib2 ################################################################
-# http://cpc.cs.qub.ac.uk/summaries/AEIT_v2_0.html
-# No need for MPI, use underlying compilers
-if (rngsse2)
-  ExternalProject_Add(
-    rngsse2
-    PREFIX rngsse2
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/rngsse2
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-               ${MACOSX_RPATH}
-               -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
-               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
-#### TestU01 ##################################################################
-# http://www.iro.umontreal.ca/~simardr/testu01/tu01.html
-# No need for MPI, use underlying compilers
-if (testu01)
-  ExternalProject_Add(
-    testu01
-    PREFIX testu01
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/testu01
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-               ${MACOSX_RPATH}
-               -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
-               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
   )
 endif()
 
