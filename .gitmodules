@@ -5,9 +5,6 @@
 	path = src/charm
 #	url = http://charm.cs.uiuc.edu/gerrit/charm
 	url = ../../UIUC-PPL/charm.git
-[submodule "src/h5part"]
-	path = src/h5part
-	url = ../../quinoacomputing/H5Part.git
 [submodule "src/hdf5"]
 	path = src/hdf5
 	url = ../../HDFGroup/hdf5.git
@@ -33,9 +30,6 @@
 [submodule "src/pugixml"]
 	path = src/pugixml
 	url = ../../zeux/pugixml.git
-[submodule "src/random123"]
-	path = src/random123
-	url = ../../quinoacomputing/Random123.git
 [submodule "src/trilinos"]
 	path = src/trilinos
 	url = ../../trilinos/Trilinos.git
