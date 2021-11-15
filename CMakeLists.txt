@@ -78,19 +78,12 @@ set(ENABLE_BOOST ON CACHE BOOL "Enable Boost")
 set(ENABLE_PSTREAMS ON CACHE BOOL "Enable Pstreams")
 set(ENABLE_PUGIXML ON CACHE BOOL "Enable PugiXML")
 set(ENABLE_PEGTL ON CACHE BOOL "Enable PEGTL")
-set(ENABLE_RANDOM123 ON CACHE BOOL "Enable Random123")
-set(ENABLE_RNGSSE2 ON CACHE BOOL "Enable RNGSSE2")
 set(ENABLE_LAPACK ON CACHE BOOL "Enable LAPACK")
-set(ENABLE_AEC ON CACHE BOOL "Enable AEC")
-set(ENABLE_H5PART ON CACHE BOOL "Enable H5Part")
-set(ENABLE_TESTU01 ON CACHE BOOL "Enable TestU01")
 set(ENABLE_TRILINOS ON CACHE BOOL "Enable Trilinos")
 set(ENABLE_TUT ON CACHE BOOL "Enable TUT")
 set(ENABLE_NUMDIFF ON CACHE BOOL "Enable NumDiff")
-set(ENABLE_ROOT OFF CACHE BOOL "Enable Root")
 set(ENABLE_BACKWARDCPP ON CACHE BOOL "Enable BackwardCpp")
 set(ENABLE_HIGHWAYHASH ON CACHE BOOL "Enable HighwayHash")
-set(ENABLE_OMEGAH OFF CACHE BOOL "Enable Omega_H")
 set(ENABLE_BRIGAND ON CACHE BOOL "Enable Brigand")
 set(ENABLE_SOL2 OFF CACHE BOOL "Enable Sol2")
 set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
@@ -98,11 +91,10 @@ set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
 set(ENABLE_EXAM2M OFF CACHE BOOL "Enable ExaM2M")
 
 # Set default requested executable targets
-set(REQUESTED_EXECUTABLES unittest inciter rngtest meshconv walker fileconv)
+set(REQUESTED_EXECUTABLES unittest inciter meshconv)
 
 # If a *_ONLY variable is set, user only wants specific executable(s)
-if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
-    WALKER_ONLY OR FILECONV_ONLY)
+if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
 
   # Turn everything off first
   set(ENABLE_CHARM OFF)
@@ -112,19 +104,12 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
   set(ENABLE_PSTREAMS OFF)
   set(ENABLE_PUGIXML OFF)
   set(ENABLE_PEGTL OFF)
-  set(ENABLE_RANDOM123 OFF)
-  set(ENABLE_RNGSSE2 OFF)
   set(ENABLE_LAPACK OFF)
-  set(ENABLE_AEC OFF)
-  set(ENABLE_H5PART OFF)
-  set(ENABLE_TESTU01 OFF)
   set(ENABLE_TRILINOS OFF)
   set(ENABLE_TUT OFF)
   set(ENABLE_NUMDIFF OFF)
-  set(ENABLE_ROOT OFF)
   set(ENABLE_BACKWARDCPP OFF)
   set(ENABLE_HIGHWAYHASH OFF)
-  set(ENABLE_OMEGAH OFF)
   set(ENABLE_BRIGAND OFF)
   set(ENABLE_SOL2 OFF)
   set(ENABLE_DOXYGEN OFF)
@@ -148,7 +133,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
     set(ENABLE_PEGTL ON)
     set(ENABLE_BOOST ON)
     set(ENABLE_LAPACK ON)
-    set(ENABLE_RANDOM123 ON)
   endif()
 
   if (INCITER_ONLY)
@@ -166,18 +150,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
     set(ENABLE_NUMDIFF ON)
   endif()
 
-  if (RNGTEST_ONLY)
-    list(APPEND REQUESTED_EXECUTABLES rngtest)
-    set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
-    set(ENABLE_TESTU01 ON)
-    set(ENABLE_BRIGAND ON)
-    set(ENABLE_PEGTL ON)
-    set(ENABLE_RANDOM123 ON)
-    set(ENABLE_BOOST ON)
-    set(ENABLE_LAPACK ON)
-  endif()
-
   if (MESHCONV_ONLY)
     list(APPEND REQUESTED_EXECUTABLES meshconv)
     set(ENABLE_CHARM ON)
@@ -191,38 +163,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR RNGTEST_ONLY OR MESHCONV_ONLY OR
     set(ENABLE_BRIGAND ON)
     set(ENABLE_HIGHWAYHASH ON)
     set(ENABLE_NUMDIFF ON)
-  endif()
-
-  if (WALKER_ONLY)
-    list(APPEND REQUESTED_EXECUTABLES walker)
-    set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
-    set(ENABLE_TRILINOS ON)
-    set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
-    set(ENABLE_PEGTL ON)
-    set(ENABLE_BRIGAND ON)
-    set(ENABLE_RANDOM123 ON)
-    set(ENABLE_BOOST ON)
-    set(ENABLE_LAPACK ON)
-    set(ENABLE_NUMDIFF ON)
-    set(ENABLE_HIGHWAYHASH ON)
-    set(ENABLE_H5PART ON)
-  endif()
-
-  if (FILECONV_ONLY)
-    list(APPEND REQUESTED_EXECUTABLES fileconv)
-    set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
-    set(ENABLE_TRILINOS ON)
-    set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
-    set(ENABLE_ROOT ON)
-    set(ENABLE_PEGTL ON)
-    set(ENABLE_PUGIXML ON)
-    set(ENABLE_BOOST ON)
-    set(ENABLE_BRIGAND ON)
-    set(ENABLE_HIGHWAYHASH ON)
   endif()
 
 endif()
@@ -548,27 +488,6 @@ if (ENABLE_PEGTL)
   endif()
 endif()
 
-# Random123
-if (ENABLE_RANDOM123)
-  find_package(Random123)
-  if(Random123_FOUND)
-    set(random123 "")
-  else()
-    set(random123 "random123")
-  endif()
-endif()
-
-# RNGSSE2
-if (ENABLE_RNGSSE2)
-  # Do not attempt to build RNGSSE2 if target architecture is not x86
-  find_package(RNGSSE2)
-  if(RNGSSE2_FOUND OR NOT ARCH MATCHES "x86")
-    set(rngsse2 "")
-  else()
-    set(rngsse2 "rngsse2")
-  endif()
-endif()
-
 # BLAS and LAPACK
 if (ENABLE_LAPACK)
   set(lapack "lapack")
@@ -586,43 +505,6 @@ if (ENABLE_LAPACK)
     if(LAPACKE_FOUND)
       set(lapack "")
     endif()
-  endif()
-endif()
-
-# AEC
-if (ENABLE_AEC)
-  if(NOT BUILD_SHARED_LIBS)  # only for static link)
-    set(aec "aec")
-    find_package(AEC)
-    if(AEC_FOUND)
-      set(aec "")
-    endif()
-  endif()
-endif()
-
-# H5Part
-if (ENABLE_H5PART)
-  if(ENABLE_AMPI)
-    set(H5PART_ROOT ${CMAKE_INSTALL_PREFIX})
-  endif()
-  find_package(H5Part)
-  if ((ENABLE_AMPI AND H5Part_FOUND AND
-       H5PART_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-      (NOT ENABLE_AMPI AND H5Part_FOUND))
-    set(h5part "")
-  else()
-    set(h5part "h5part")
-    message(STATUS "H5Part either not found or AMPI is enabled: will build")
-  endif()
-endif()
-
-# TestU01
-if (ENABLE_TESTU01)
-  find_package(TestU01)
-  if(TestU01_FOUND)
-    set(testu01 "")
-  else()
-    set(testu01 "testu01")
   endif()
 endif()
 
@@ -667,27 +549,6 @@ if (ENABLE_NUMDIFF)
   endif()
 endif()
 
-# Root
-if (ENABLE_ROOT)
-  find_package(Root COMPONENTS RIO Core Tree Hist)
-  if(Root_FOUND)
-    set(root "")
-  elseif(NOT EXISTS ${PROJECT_SOURCE_DIR}/src/root/CMakeLists.txt)
-    message(WARNING "ROOT enabled, but not found on system and not found as a git submodule. If you want ROOT, try switching to branch 'all' of the TPL repository (by running 'git checkout all' in the TPL repo).")
-    set(root "")
-  else()
-    set(root "root")
-    # Root does not support libc++ on linux, so remove if configured
-    if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      string(FIND "${CXXFLAGS}" "-stdlib=libc++" pos)
-      if (NOT "${pos}" STREQUAL "-1")
-        message(STATUS "Removing C++ compiler flag '-stdlib=libc++' as Root does not support it")
-        string(REPLACE "-stdlib=libc++" "" CXXFLAGS ${CXXFLAGS})
-      endif()
-    endif()
-  endif()
-endif()
-
 # Backward-cpp
 if (ENABLE_BACKWARDCPP)
   find_package(BackwardCpp)
@@ -705,22 +566,6 @@ if (ENABLE_HIGHWAYHASH)
     set(highwayhash "")
   else()
     set(highwayhash "highwayhash")
-  endif()
-endif()
-
-# Omega_h
-if (ENABLE_OMEGA_H)
-  if(ENABLE_AMPI)
-    set(OMEGA_H_ROOT ${CMAKE_INSTALL_PREFIX})
-  endif()
-  find_package(Omega_h)
-  if ((ENABLE_AMPI AND Omega_h_FOUND AND
-       OMEGA_H_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-      (NOT ENABLE_AMPI AND Omega_h_FOUND))
-    set(omega_h "")
-  else()
-    set(omega_h "omega_h")
-    message(STATUS "Omega_h either not found or AMPI is enabled: will build")
   endif()
 endif()
 
@@ -786,10 +631,9 @@ endif()
 include(get_compiler_flags)
 get_compiler_flags()
 
-set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pstreams}
-${pugixml} ${pegtl} ${random123} ${rngsse2} ${lapack} ${aec} ${h5part}
-${testu01} ${trilinos} ${tut} ${numdiff} ${root} ${backwardcpp} ${highwayhash}
-${omega_h} ${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
+set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pstreams} ${pugixml}
+${pegtl} ${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
+${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
 
 list(LENGTH tpls2build ntpl)
 
@@ -936,30 +780,6 @@ if (netcdf)
   )
 endif()
 
-#### AEC #######################################################################
-## https://gitlab.dkrz.de/k202009/libaec
-if (aec)
-  if(BUILD_SHARED_LIBS)
-    set(AEC_SHARED "--enable-shared")
-  else()
-    set(AEC_SHARED "--enable-static;--disable-shared")
-  endif()
-  ExternalProject_Add(
-    aec
-    PREFIX aec
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/aec
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
-               -D CMAKE_C_FLAGS:STRING=${FCLAGS}
-               -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
 #### lapack ####################################################################
 # http://www.netlib.org/lapack
 if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
@@ -1077,26 +897,6 @@ if (pegtl)
  )
 endif()
 
-#### Random123 (Counter-based random number generators library) ################
-# http://www.thesalmons.org/john/random123/releases/latest/docs/index.html
-# Header only
-if (random123)
- ExternalProject_Add(
-   random123
-   PREFIX random123
-   # Header-only, copy include dir over
-   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                     ${PROJECT_SOURCE_DIR}/src/random123/include
-                     ${CMAKE_INSTALL_PREFIX}/include
-   # Copy examples/uniform.hpp over
-   BUILD_COMMAND ${CMAKE_COMMAND} -E copy
-                 ${PROJECT_SOURCE_DIR}/src/random123/examples/uniform.hpp
-                 ${CMAKE_INSTALL_PREFIX}/include/Random123
-   INSTALL_COMMAND ""
-   DOWNLOAD_COMMAND ""
- )
-endif()
-
 #### TUT (Template Unit Test Framework) ########################################
 # http://tut-framework.sourceforge.net
 # Header only
@@ -1111,49 +911,6 @@ if(tut)
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### RNGSSELib2 ################################################################
-# http://cpc.cs.qub.ac.uk/summaries/AEIT_v2_0.html
-# No need for MPI, use underlying compilers
-if (rngsse2)
-  ExternalProject_Add(
-    rngsse2
-    PREFIX rngsse2
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/rngsse2
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-               ${MACOSX_RPATH}
-               -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
-               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
-#### TestU01 ##################################################################
-# http://www.iro.umontreal.ca/~simardr/testu01/tu01.html
-# No need for MPI, use underlying compilers
-if (testu01)
-  ExternalProject_Add(
-    testu01
-    PREFIX testu01
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/testu01
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-               ${MACOSX_RPATH}
-               -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
-               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
   )
 endif()
 
@@ -1211,41 +968,6 @@ if (pugixml)
   )
 endif()
 
-#### H5part ####################################################################
-# http://vis.lbl.gov/Research/H5Part
-if(BUILD_SHARED_LIBS)
-  set(H5PART_SHARED "--enable-shared;--disable-static")
-else()
-  set(H5PART_SHARED "--disable-shared;--enable-static")
-endif()
-if(h5part)
-  ExternalProject_Add(
-    h5part
-    DEPENDS ${hdf5} ${ampi}
-    PREFIX h5part
-    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                     ${PROJECT_SOURCE_DIR}/src/h5part
-                     ${PROJECT_BINARY_DIR}/h5part
-    PATCH_COMMAND autoreconf -fi ${PROJECT_BINARY_DIR}/h5part
-    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/h5part/configure
-                      FC=${MPI_Fortran_COMPILER}
-                      FFLAGS=${FFLAGS}
-                      CC=${MPI_C_COMPILER}
-                      CFLAGS=${CFLAGS}
-                      CXX=${MPI_CXX_COMPILER}
-                      CXXFLAGS=${CXXFLAGS}
-                      --with-hdf5=${hdf5_root}
-                      --enable-parallel
-                      ${H5PART_SHARED}
-                      --prefix=${CMAKE_INSTALL_PREFIX}
-    BUILD_IN_SOURCE 1
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
 #### NumDiff ###################################################################
 # https://github.com/MethodicalAcceleratorDesign/MAD-X/tree/master/tools/numdiff
 if(numdiff)
@@ -1258,30 +980,6 @@ if(numdiff)
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
-#### Root ######################################################################
-# https://root.cern.ch
-if(root)
-  ExternalProject_Add(
-    root
-    PREFIX root
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/root
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D CMAKE_CXX_COMPILER:PATH=${UNDERLYING_CXX_COMPILER}
-               -D CMAKE_C_COMPILER:PATH=${UNDERLYING_C_COMPILER}
-               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
-               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
-               -Ddavix=OFF
-               -D CMAKE_CXX_STANDARD=17
-               -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-               -Dimt=OFF
     LOG_DOWNLOAD 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
@@ -1322,26 +1020,6 @@ if (highwayhash)
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### Omega_h, tetrahedron and triangle mesh adaptativity #######################
-# https://github.com/SNLComputation/omega_h
-if (omega_h)
-  ExternalProject_Add(
-    omega_h
-    PREFIX omega_h
-    DEPENDS ${ampi}
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/omega_h
-    CMAKE_ARGS -D Omega_h_USE_MPI:BOOL=ON
-               -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
-               -D Omega_h_EXTRA_CXX_FLAGS:STRING=${CXXFLAGS}
-               -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
   )
 endif()
 
