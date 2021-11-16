@@ -75,7 +75,6 @@ set(ENABLE_CHARM ON CACHE BOOL "Enable Charm++")
 set(ENABLE_HDF5 ON CACHE BOOL "Enable HDF5")
 set(ENABLE_NETCDF ON CACHE BOOL "Enable NetCDF")
 set(ENABLE_BOOST ON CACHE BOOL "Enable Boost")
-set(ENABLE_PSTREAMS ON CACHE BOOL "Enable Pstreams")
 set(ENABLE_PUGIXML ON CACHE BOOL "Enable PugiXML")
 set(ENABLE_PEGTL ON CACHE BOOL "Enable PEGTL")
 set(ENABLE_LAPACK ON CACHE BOOL "Enable LAPACK")
@@ -101,7 +100,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
   set(ENABLE_HDF5 OFF)
   set(ENABLE_NETCDF OFF)
   set(ENABLE_BOOST OFF)
-  set(ENABLE_PSTREAMS OFF)
   set(ENABLE_PUGIXML OFF)
   set(ENABLE_PEGTL OFF)
   set(ENABLE_LAPACK OFF)
@@ -122,7 +120,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
   if (UNITTEST_ONLY)
     list(APPEND REQUESTED_EXECUTABLES unittest)
     set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
     set(ENABLE_PUGIXML ON)
     set(ENABLE_TRILINOS ON)
     set(ENABLE_NETCDF ON)
@@ -138,7 +135,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
   if (INCITER_ONLY)
     list(APPEND REQUESTED_EXECUTABLES inciter)
     set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
     set(ENABLE_TRILINOS ON)
     set(ENABLE_NETCDF ON)
     set(ENABLE_HDF5 ON)
@@ -153,7 +149,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
   if (MESHCONV_ONLY)
     list(APPEND REQUESTED_EXECUTABLES meshconv)
     set(ENABLE_CHARM ON)
-    set(ENABLE_PSTREAMS ON)
     set(ENABLE_TRILINOS ON)
     set(ENABLE_NETCDF ON)
     set(ENABLE_HDF5 ON)
@@ -458,16 +453,6 @@ if (ENABLE_BOOST)
   endif()
 endif()
 
-# PStreams
-if (ENABLE_PSTREAMS)
-  find_package(Pstreams)
-  if(PSTREAMS_FOUND)
-    set(pstreams "")
-  else()
-    set(pstreams "pstreams")
-  endif()
-endif()
-
 # Pugixml
 if (ENABLE_PUGIXML)
   find_package(Pugixml)
@@ -631,8 +616,8 @@ endif()
 include(get_compiler_flags)
 get_compiler_flags()
 
-set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pstreams} ${pugixml}
-${pegtl} ${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
+set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pugixml} ${pegtl}
+${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
 ${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
 
 list(LENGTH tpls2build ntpl)
@@ -926,23 +911,6 @@ if (boost)
                       ${PROJECT_SOURCE_DIR}/src/boost/boost
                       ${CMAKE_INSTALL_PREFIX}/include/boost/
     BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### Pstreams (POSIX Process Control in C++) ###################################
-# http://pstreams.sourceforge.net/
-# Header only, only if not found
-if (pstreams)
-  ExternalProject_Add(
-    pstreams
-    PREFIX pstreams
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E make_directory
-                      ${CMAKE_INSTALL_PREFIX}/include/pstreams
-    BUILD_COMMAND ${CMAKE_COMMAND} -E copy
-                  ${PROJECT_SOURCE_DIR}/src/pstreams/pstream.h
-                  ${CMAKE_INSTALL_PREFIX}/include/pstreams
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
   )
