@@ -23,10 +23,6 @@
 [submodule "src/pegtl"]
 	path = src/pegtl
 	url = ../../taocpp/PEGTL.git
-[submodule "src/pstreams"]
-	path = src/pstreams
-#	url = https://git.code.sf.net/p/pstreams/code
-	url = ../../jwakely/pstreams.git 
 [submodule "src/pugixml"]
 	path = src/pugixml
 	url = ../../zeux/pugixml.git
