@@ -445,7 +445,7 @@ if (ENABLE_BOOST)
   if(NOT BUILD_SHARED_LIBS)
     set(Boost_USE_STATIC_LIBS true)
   endif()
-  find_package(Boost 1.56.0)
+  find_package(Boost 1.74.0)
   if(Boost_FOUND)
     set(boost "")
   else()
@@ -881,21 +881,22 @@ if(tut)
 endif()
 
 #### Boost ####################################################################
-# http://www.boost.org
-# Header only, only if not found
-if (boost)
-  ExternalProject_Add(
-    boost
-    PREFIX boost
-    # Header-only, copy include dir over
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                      ${PROJECT_SOURCE_DIR}/src/boost/boost
-                      ${CMAKE_INSTALL_PREFIX}/include/boost/
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    DOWNLOAD_COMMAND ""
-  )
-endif()
+# The following TPL needs to be updated to atleast v1.74
+## http://www.boost.org
+## Header only, only if not found
+#if (boost)
+#  ExternalProject_Add(
+#    boost
+#    PREFIX boost
+#    # Header-only, copy include dir over
+#    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                      ${PROJECT_SOURCE_DIR}/src/boost/boost
+#                      ${CMAKE_INSTALL_PREFIX}/include/boost/
+#    BUILD_COMMAND ""
+#    INSTALL_COMMAND ""
+#    DOWNLOAD_COMMAND ""
+#  )
+#endif()
 
 #### pugixml ###################################################################
 # http://pugixml.org
