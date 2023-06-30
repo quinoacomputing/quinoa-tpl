@@ -881,22 +881,21 @@ if(tut)
 endif()
 
 #### Boost ####################################################################
-# The following TPL needs to be updated to atleast v1.74
-## http://www.boost.org
-## Header only, only if not found
-#if (boost)
-#  ExternalProject_Add(
-#    boost
-#    PREFIX boost
-#    # Header-only, copy include dir over
-#    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                      ${PROJECT_SOURCE_DIR}/src/boost/boost
-#                      ${CMAKE_INSTALL_PREFIX}/include/boost/
-#    BUILD_COMMAND ""
-#    INSTALL_COMMAND ""
-#    DOWNLOAD_COMMAND ""
-#  )
-#endif()
+# http://www.boost.org
+# Header only, only if not found
+if (boost)
+  ExternalProject_Add(
+    boost
+    PREFIX boost
+    # Header-only, copy include dir over
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/boost/boost
+                      ${CMAKE_INSTALL_PREFIX}/include/boost/
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DOWNLOAD_COMMAND ""
+  )
+endif()
 
 #### pugixml ###################################################################
 # http://pugixml.org
