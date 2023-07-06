@@ -1046,8 +1046,6 @@ if (exam2m)
     PREFIX exam2m
     DEPENDS ${charm} ${brigand} ${hdf5} ${netcdf} ${highwayhash} ${trilinos}
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/exam2m/src
-    PATCH_COMMAND patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake
-      /exam2m_remove_executable.patch
     CMAKE_ARGS -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
                -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
