@@ -5,9 +5,6 @@
 	path = src/charm
 #	url = http://charm.cs.uiuc.edu/gerrit/charm
 	url = ../../UIUC-PPL/charm.git
-[submodule "src/hdf5"]
-	path = src/hdf5
-	url = ../../HDFGroup/hdf5.git
 #[submodule "src/hypre"]
 #	path = src/hypre
 #	url = ../../quinoacomputing/HYPRE.git
@@ -45,9 +42,6 @@
 [submodule "src/brigand"]
 	path = src/brigand
 	url = ../../edouarda/brigand.git
-[submodule "src/hdf5-ampi"]
-	path = src/hdf5-ampi
-	url = ../../UIUC-PPL/hdf5-ampi.git
 [submodule "src/doxygen"]
 	path = src/doxygen
 	url = ../../doxygen/doxygen

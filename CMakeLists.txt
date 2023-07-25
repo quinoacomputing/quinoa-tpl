@@ -72,7 +72,6 @@ string(TOLOWER ${CMAKE_SYSTEM_NAME} SYSTEM_NAME)
 
 # Set which libraries are built/searched by default
 set(ENABLE_CHARM ON CACHE BOOL "Enable Charm++")
-set(ENABLE_HDF5 ON CACHE BOOL "Enable HDF5")
 set(ENABLE_NETCDF ON CACHE BOOL "Enable NetCDF")
 set(ENABLE_BOOST ON CACHE BOOL "Enable Boost")
 set(ENABLE_PUGIXML ON CACHE BOOL "Enable PugiXML")
@@ -97,7 +96,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
 
   # Turn everything off first
   set(ENABLE_CHARM OFF)
-  set(ENABLE_HDF5 OFF)
   set(ENABLE_NETCDF OFF)
   set(ENABLE_BOOST OFF)
   set(ENABLE_PUGIXML OFF)
@@ -123,7 +121,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
     set(ENABLE_PUGIXML ON)
     set(ENABLE_TRILINOS ON)
     set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
     set(ENABLE_HIGHWAYHASH ON)
     set(ENABLE_BRIGAND ON)
     set(ENABLE_TUT ON)
@@ -137,7 +134,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
     set(ENABLE_CHARM ON)
     set(ENABLE_TRILINOS ON)
     set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
     set(ENABLE_HIGHWAYHASH ON)
     set(ENABLE_BRIGAND ON)
     set(ENABLE_PEGTL ON)
@@ -151,7 +147,6 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
     set(ENABLE_CHARM ON)
     set(ENABLE_TRILINOS ON)
     set(ENABLE_NETCDF ON)
-    set(ENABLE_HDF5 ON)
     set(ENABLE_PEGTL ON)
     set(ENABLE_PUGIXML ON)
     set(ENABLE_BOOST ON)
@@ -380,46 +375,6 @@ endif()
 
 # Attempt to find some TPLs on the system
 
-# HDF5
-if (ENABLE_HDF5)
-  set(HDF5_PREFER_PARALLEL true)
-  if(NOT BUILD_SHARED_LIBS)
-    set(HDF5_USE_STATIC_LIBRARIES true)
-  endif()
-  if(ENABLE_AMPI)
-    set(HDF5_ROOT ${CMAKE_INSTALL_PREFIX})
-  endif()
-  find_package(HDF5 COMPONENTS C HL)
-  if ((ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL AND
-       HDF5_INCLUDE_DIRS MATCHES ${CMAKE_INSTALL_PREFIX}) OR
-      (NOT ENABLE_AMPI AND HDF5_FOUND AND HDF5_IS_PARALLEL))
-    set(hdf5 "")
-    set(hdf5_include_dirs_flags "${HDF5_INCLUDE_DIRS}")
-    string(REGEX REPLACE "([^;]+)" "CPPFLAGS=-I\\1" hdf5_include_dirs_flags
-           "${hdf5_include_dirs_flags}")
-    set(hdf5_library_dirs "${HDF5_LIBRARIES}")
-    list(GET HDF5_LIBRARIES 0 hdf5_root)  # get the first item of cmake list
-    get_filename_component(hdf5_root_last ${hdf5_root} NAME)
-    get_filename_component(hdf5_root ${hdf5_root} DIRECTORY )
-    set(hdf5_library_dirs_flags "${hdf5_root}")
-    string(REGEX REPLACE "([^;]+)" "LDFLAGS=-L\\1" hdf5_library_dirs_flags
-          "${hdf5_library_dirs_flags}")
-    set(hdf5_library_dirs_flags "${hdf5_library_dirs_flags}/lib")
-    # strip "/lib" and "/lib64"
-    if ("${hdf5_root}" MATCHES "lib(64)?$")
-      get_filename_component(hdf5_root ${hdf5_root} DIRECTORY)
-    endif()
-  else()
-    message(STATUS "HDF5 either not found, not parallel, disabled, or AMPI is enabled: will build")
-    set(hdf5 "hdf5")
-    set(hdf5_ampi "-ampi")
-    set(hdf5_include_dirs_flags "CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/include")
-    set(hdf5_library_dirs_flags "LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/lib")
-    set(hdf5_library_dirs "${CMAKE_INSTALL_PREFIX}/lib")
-    set(hdf5_root "${CMAKE_INSTALL_PREFIX}")
-  endif()
-endif()
-
 # NetCDF
 if (ENABLE_NETCDF)
   if(ENABLE_AMPI)
@@ -606,7 +561,7 @@ endif()
 include(get_compiler_flags)
 get_compiler_flags()
 
-set(tpls2build ${charm} ${hdf5} ${netcdf} ${boost} ${pugixml} ${pegtl}
+set(tpls2build ${charm} ${netcdf} ${boost} ${pugixml} ${pegtl}
 ${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
 ${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
 
@@ -671,48 +626,6 @@ if (charm)
   )
 endif()
 
-#### HDF5 ######################################################################
-# http://www.hdfgroup.org/HDF5
-if (hdf5)
-  if(NOT BUILD_SHARED_LIBS)
-    set(HDF5_PATCH "patch;-p1;-t;-i;${PROJECT_SOURCE_DIR}/cmake/hdf5_remove_get_time.patch")
-  endif()
-  if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
-    set(HDF5_SHARED "--enable-shared")
-  else()
-    set(HDF5_SHARED "--disable-shared;--enable-static;--with-pic")
-  endif()
-  if (ENABLE_AMPI)
-    set(AMPI_RUNSERIAL "RUNSERIAL=\'\'${AMPI_RUN} ++quiet\'\'" )
-    set(AMPI_RUNPARALLEL "RUNPARALLEL=\'\'${AMPI_RUN} ++quiet +p4\'\'" )
-  endif()
-  ExternalProject_Add(
-    hdf5
-    PREFIX hdf5
-    DEPENDS ${ampi}
-    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                     ${PROJECT_SOURCE_DIR}/src/hdf5${hdf5_ampi}
-                     ${PROJECT_BINARY_DIR}/hdf5
-    SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5
-    PATCH_COMMAND ${HDF5_PATCH}
-    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/hdf5/configure
-                      CC=${MPI_C_COMPILER}
-                      CFLAGS=${CFLAGS}
-                      ${PGCPP}
-                      ${AMPI_RUNSERIAL}
-                      ${AMPI_RUNPARALLEL}
-                      --enable-parallel
-                      --enable-symbols=yes
-                      ${HDF5_SHARED}
-                      --prefix=${CMAKE_INSTALL_PREFIX}
-    BUILD_IN_SOURCE 1
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
-endif()
-
 #### NETCDF ####################################################################
 ## http://www.unidata.ucar.edu/downloads/netcdf/index.jsp
 if (netcdf)
@@ -727,7 +640,7 @@ if (netcdf)
   endif()
   ExternalProject_Add(
     netcdf
-    DEPENDS ${hdf5} ${ampi}
+    DEPENDS ${ampi}
     PREFIX netcdf
     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                      ${PROJECT_SOURCE_DIR}/src/netcdf
@@ -737,9 +650,7 @@ if (netcdf)
                       CFLAGS=${CFLAGS}
                       ${NETCDF_UTILS}
                       ${PGCPP}
-                      ${hdf5_include_dirs_flags}
-                      ${hdf5_library_dirs_flags}
-                      --enable-netcdf4
+                      --disable-netcdf4
                       --disable-examples
                       --disable-fsync
                       --disable-dap
@@ -788,11 +699,6 @@ if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=ON")
 else()
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=OFF;-DTPL_FIND_SHARED_LIBS:BOOL=OFF;-DTrilinos_LINK_SEARCH_START_STATIC:BOOL=ON;-DCMAKE_SKIP_INSTALL_RPATH=TRUE")
-  if(ARCH MATCHES "ppc64")
-    set(tr_hdf5 "-DTrilinos_EXTRA_LINK_FLAGS=-L${hdf5_library_dirs} -lhdf5_hl -lhdf5 ${ZLIB_LIBRARIES} -lm -ldl")
-  else()
-    set(tr_hdf5 "-DTrilinos_EXTRA_LINK_FLAGS=-L${hdf5_library_dirs} -lhdf5_hl -lhdf5 -lz -lm -ldl")
-  endif()
 endif()
 if (HOST_OS MATCHES "alpine")
   set(TRILINOS_ALPINE "-DBLAS_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib;-DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib;-DTrilinos_CXX11_FLAGS=-std=c++11")
@@ -810,7 +716,7 @@ endif()
 if(trilinos)
   ExternalProject_Add(
     trilinos
-    DEPENDS ${hdf5} ${netcdf} ${lapack} ${ampi}
+    DEPENDS ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
     CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
@@ -823,7 +729,6 @@ if(trilinos)
                -D Trilinos_ENABLE_SEACASExodiff:BOOL=ON
                -D Trilinos_ENABLE_Fortran=OFF
                -D Trilinos_ENABLE_DEBUG=OFF
-               ${tr_hdf5}
                ${TRILINOS_SHARED}
                ${TRILINOS_ALPINE}
                ${TRILINOS_BLAS}
@@ -1044,7 +949,7 @@ if (exam2m)
   ExternalProject_Add(
     exam2m
     PREFIX exam2m
-    DEPENDS ${charm} ${brigand} ${hdf5} ${netcdf} ${highwayhash} ${trilinos}
+    DEPENDS ${charm} ${brigand} ${netcdf} ${highwayhash} ${trilinos}
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/exam2m/src
     CMAKE_ARGS -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
                -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
