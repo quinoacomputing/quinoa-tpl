@@ -86,7 +86,6 @@ set(ENABLE_BRIGAND ON CACHE BOOL "Enable Brigand")
 set(ENABLE_SOL2 OFF CACHE BOOL "Enable Sol2")
 set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
 set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
-set(ENABLE_EXAM2M OFF CACHE BOOL "Enable ExaM2M")
 
 # Set default requested executable targets
 set(REQUESTED_EXECUTABLES unittest inciter meshconv)
@@ -282,11 +281,7 @@ set(ENABLE_AMPI OFF CACHE BOOL "Enable AMPI")
 if(NOT ENABLE_AMPI)
   include(MPICompilers)
   get_mpi_compilers()
-  if (ENABLE_EXAM2M)
-    set(CHARM_BUILD_TARGET "LIBS")
-  else()
-    set(CHARM_BUILD_TARGET "charm++")
-  endif()
+  set(CHARM_BUILD_TARGET "LIBS")
   set(ampi "")
   set(CHARM_RUN "${CMAKE_INSTALL_PREFIX}/charm/bin/charmrun")
 else()
@@ -546,16 +541,6 @@ if (ENABLE_MCSS)
   endif()
 endif()
 
-# ExaM2M
-if (ENABLE_EXAM2M)
-  find_package(ExaM2M)
-  if(ExaM2M_FOUND)
-    set(exam2m"")
-  else()
-    set(exam2m "exam2m")
-  endif()
-endif()
-
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -563,7 +548,7 @@ get_compiler_flags()
 
 set(tpls2build ${charm} ${netcdf} ${boost} ${pugixml} ${pegtl}
 ${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
-${brigand} ${sol2} ${doxygen} ${mcss} ${exam2m})
+${brigand} ${sol2} ${doxygen} ${mcss})
 
 list(LENGTH tpls2build ntpl)
 
@@ -940,24 +925,5 @@ if (mcss)
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DOWNLOAD_COMMAND ""
-  )
-endif()
-
-#### ExaM2M, tetrahedron mesh-to-mesh transfer #################################
-# https://github.com/Charmworks/ExaM2M
-if (exam2m)
-  ExternalProject_Add(
-    exam2m
-    PREFIX exam2m
-    DEPENDS ${charm} ${brigand} ${netcdf} ${highwayhash} ${trilinos}
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/exam2m/src
-    CMAKE_ARGS -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
-               -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
-               -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    LOG_DOWNLOAD 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
   )
 endif()
