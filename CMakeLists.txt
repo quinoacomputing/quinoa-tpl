@@ -592,6 +592,8 @@ if (charm)
     SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
     # Build in install dir and leave stuff there - no install step
     BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
+    PATCH_COMMAND
+      patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/migratable_charmcollide.patch
     # Build Charm++
     BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/buildold
                   ${CHARM_BUILD_TARGET}
