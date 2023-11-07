@@ -33,14 +33,6 @@ message(STATUS "Detected OS: ${HOST_OS}")
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries. Possible value: ON")
 message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
-# Conditionally enforce static linking for exeuctables added after this point.
-# This must precede all add_executable() calls adding executables to link
-# statically.
-if (NOT BUILD_SHARED_LIBS)
-  set(CMAKE_EXE_LINKER_FLAGS "-static")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-endif()
-
 # Include support for multiarch path names
 include(GNUInstallDirs)
 
@@ -393,9 +385,6 @@ endif()
 
 # Boost
 if (ENABLE_BOOST)
-  if(NOT BUILD_SHARED_LIBS)
-    set(Boost_USE_STATIC_LIBS true)
-  endif()
   find_package(Boost 1.74.0)
   if(Boost_FOUND)
     set(boost "")
@@ -571,9 +560,7 @@ set_property(DIRECTORY PROPERTY EP_STEP_TARGETS
 
 #### Charm++ ###################################################################
 # http://charm.cs.illinois.edu
-if(BUILD_SHARED_LIBS)
-  set(CHARM_SHARED "--build-shared")
-endif()
+set(CHARM_SHARED "--build-shared")
 # Enable "--with-production" for Charm++ build for Release builds
 if(CMAKE_BUILD_TYPE MATCHES "REL")      # Release | RelWithDebInfo | MinSizeRel
   set(CHARM_RELEASE_BUILD "--with-production")
@@ -621,7 +608,7 @@ endif()
 #### NETCDF ####################################################################
 ## http://www.unidata.ucar.edu/downloads/netcdf/index.jsp
 if (netcdf)
-  if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
+  if(NOT ENABLE_AMPI)
     set(NETCDF_SHARED "--enable-shared")
   else()
     set(NETCDF_SHARED "--enable-static;--disable-shared;--with-pic")
@@ -660,7 +647,7 @@ endif()
 
 #### lapack ####################################################################
 # http://www.netlib.org/lapack
-if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
+if(NOT ENABLE_AMPI)
   set(LAPACK_BUILD_SHARED_LIBS on)
 elseif()
   set(LAPACK_BUILD_SHARED_LIBS off)
@@ -687,7 +674,7 @@ endif()
 
 ##### Trilinos #################################################################
 ## http://trilinos.sandia.gov
-if(BUILD_SHARED_LIBS AND NOT ENABLE_AMPI)
+if(NOT ENABLE_AMPI)
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=ON")
 else()
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=OFF;-DTPL_FIND_SHARED_LIBS:BOOL=OFF;-DTrilinos_LINK_SEARCH_START_STATIC:BOOL=ON;-DCMAKE_SKIP_INSTALL_RPATH=TRUE")
