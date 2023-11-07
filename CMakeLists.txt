@@ -30,7 +30,8 @@ detect_os()
 message(STATUS "Detected OS: ${HOST_OS}")
 
 # Set BUILD_SHARED_LIBS
-include(BuildShared)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries. Possible value: ON")
+message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
 # Conditionally enforce static linking for exeuctables added after this point.
 # This must precede all add_executable() calls adding executables to link
