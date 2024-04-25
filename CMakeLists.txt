@@ -194,10 +194,7 @@ if (charm)
   endif()
 
   # Set Charm++ architecture
-  if (NOT DEFINED ENV{CRAY_PRGENVPGI} AND  # not Cray
-      NOT DEFINED ENV{CRAY_PRGENVGNU} AND
-      NOT DEFINED ENV{CRAY_PRGENVCRAY} AND
-      NOT DEFINED ENV{CRAY_PRGENVINTEL})
+  if(NOT DEFINED ENV{CRAYPE_VERSION} AND NOT DEFINED ENV{PE_ENV})  # not Cray
 
     if(NOT ENABLE_AMPI)
       set(CHARM_COMM_SUBSYSTEM "mpi")
@@ -219,19 +216,19 @@ if (charm)
 
     endif()
 
-    set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
-
   else()  # Cray
 
     if(NOT ENABLE_AMPI)
-      set(CHARM_COMM_SUBSYSTEM "mpi")
+      set(CHARM_COMM_SUBSYSTEM "ofi")
     else()
       set(CHARM_COMM_SUBSYSTEM "gni")   # never tested
     endif()
 
-    set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-crayxc")
+    set(CHARM_EXTRA_ARGS "cxi;slurmpmi2cray")
 
   endif()
+
+  set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
 
   message(STATUS "Charm++ architecture/version: ${CHARM_ARCHITECTURE}")
 
