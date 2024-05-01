@@ -224,8 +224,6 @@ if (charm)
       set(CHARM_COMM_SUBSYSTEM "gni")   # never tested
     endif()
 
-    set(CHARM_EXTRA_ARGS "cxi;slurmpmi2cray")
-
   endif()
 
   set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
