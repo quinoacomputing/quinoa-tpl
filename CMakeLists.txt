@@ -216,8 +216,6 @@ if (charm)
 
     endif()
 
-    set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
-
   else()  # Cray
 
     if(NOT ENABLE_AMPI)
@@ -226,9 +224,9 @@ if (charm)
       set(CHARM_COMM_SUBSYSTEM "gni")   # never tested
     endif()
 
-    set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-crayxc")
-
   endif()
+
+  set(CHARM_ARCHITECTURE "${CHARM_COMM_SUBSYSTEM}-${SYSTEM_NAME}${CHARM_ARCH}")
 
   message(STATUS "Charm++ architecture/version: ${CHARM_ARCHITECTURE}")
 
