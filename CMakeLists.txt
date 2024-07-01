@@ -879,12 +879,16 @@ if (sol2)
     sol2
     PREFIX sol2
     # Header-only, copy include dir over
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                      ${PROJECT_SOURCE_DIR}/src/sol2/include/sol
-                      ${CMAKE_INSTALL_PREFIX}/include/sol
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                     ${PROJECT_SOURCE_DIR}/src/sol2/include/sol
+                     ${CMAKE_INSTALL_PREFIX}/include/sol
+    # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
+    SOURCE_DIR ${CMAKE_INSTALL_PREFIX}
+    PATCH_COMMAND
+      patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/emptymacro_sol2.patch
+    CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
-    DOWNLOAD_COMMAND ""
   )
 endif()
 
