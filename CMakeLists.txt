@@ -14,6 +14,10 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 project(TPL C CXX Fortran)
 include(ExternalProject)
 
+# Building charm and trilinos separately
+option(BUILD_CHARM "Build charm package" ON)
+option(BUILD_TRILINOS "Build trilinos package" ON)
+
 # Quinoa cmake modules directory
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -550,7 +554,7 @@ if (tpls2build)
   message(STATUS "Will build the following ${ntpl} TPLs for executable(s) ${REQUESTED_EXECUTABLES}: ${tpls2build}")
 else()
   message(STATUS "All TPLs found. No need to build.")
-endif()
+endif() 
 
 # Define fine-grained targets
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS
@@ -568,39 +572,42 @@ if (HOST_OS MATCHES "alpine")
   # https://lists.cs.illinois.edu/lists/arc/charm/2016-04/msg00002.html
   set(CHARM_ALPINE "--disable-charmdebug")
 endif()
-if (charm)
-  set(CHARM_CXXFLAGS "${CXXFLAGS}")
-  string(REPLACE " " ";" CHARM_CXXFLAGS "${CHARM_CXXFLAGS}")
-  ExternalProject_Add(
-    charm
-    PREFIX charm
-    # Move unpacked tarball to install dir and build there
-    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                     ${PROJECT_SOURCE_DIR}/src/charm
-                     ${CMAKE_INSTALL_PREFIX}/charm
-    # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
-    SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
-    # Build in install dir and leave stuff there - no install step
-    BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
-    PATCH_COMMAND
-      patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/migratable_charmcollide.patch
-    # Build Charm++
-    BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/buildold
-                  ${CHARM_BUILD_TARGET}
-                  ${CHARM_ARCHITECTURE}
-                  ${CHARM_EXTRA_ARGS}
-                  ${CHARM_COMPILER}
-                  ${CHARM_PTHREADS}
-                  ${CHARM_SHARED}
-                  ${CHARM_RELEASE_BUILD}
-                  ${CHARM_ALPINE}
-                  -j${PROCESSOR_COUNT}
-                  ${CHARM_CXXFLAGS}
-    CONFIGURE_COMMAND ""
-    INSTALL_COMMAND ""
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-  )
+if (BUILD_CHARM) 
+  if (charm)
+    set(CHARM_CXXFLAGS "${CXXFLAGS}")
+    string(REPLACE " " ";" CHARM_CXXFLAGS "${CHARM_CXXFLAGS}")
+    ExternalProject_Add(
+      charm
+      PREFIX charm
+      # Move unpacked tarball to install dir and build there
+      DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/charm
+                      ${CMAKE_INSTALL_PREFIX}/charm
+      #CMAKE_ARGS -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
+      # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
+      SOURCE_DIR ${CMAKE_INSTALL_PREFIX}/charm
+      # Build in install dir and leave stuff there - no install step
+      BINARY_DIR ${CMAKE_INSTALL_PREFIX}/charm
+      PATCH_COMMAND
+        patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/migratable_charmcollide.patch
+      # Build Charm++
+      BUILD_COMMAND ${CMAKE_INSTALL_PREFIX}/charm/buildold
+                    ${CHARM_BUILD_TARGET}
+                    ${CHARM_ARCHITECTURE}
+                    ${CHARM_EXTRA_ARGS}
+                    ${CHARM_COMPILER}
+                    ${CHARM_PTHREADS}
+                    ${CHARM_SHARED}
+                    ${CHARM_RELEASE_BUILD}
+                    ${CHARM_ALPINE}
+                    -j${PROCESSOR_COUNT}
+                    ${CHARM_CXXFLAGS}
+      CONFIGURE_COMMAND ""
+      INSTALL_COMMAND ""
+      LOG_CONFIGURE 1
+      LOG_BUILD 1
+    )
+  endif()
 endif()
 
 #### NETCDF ####################################################################
@@ -690,42 +697,51 @@ if(LAPACKE_FOUND)
 else()
   set(TRILINOS_LAPACK -DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib)
 endif()
-if(trilinos)
-  ExternalProject_Add(
-    trilinos
-    DEPENDS ${netcdf} ${lapack} ${ampi}
-    PREFIX trilinos
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
-    CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
-               -D TPL_ENABLE_MPI:BOOL=ON
-               -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
-               -D Trilinos_ENABLE_Zoltan2:BOOL=ON
-               -D Zoltan2_ENABLE_Experimental:BOOL=ON
-               -D Trilinos_ENABLE_SECONDARY_STABLE_CODE:BOOL=ON
-               -D Trilinos_ENABLE_SEACASExodus:BOOL=ON
-               -D Trilinos_ENABLE_SEACASExodiff:BOOL=ON
-               -D Trilinos_ENABLE_Fortran=OFF
-               -D Trilinos_ENABLE_DEBUG=OFF
-               ${TRILINOS_SHARED}
-               ${TRILINOS_ALPINE}
-               ${TRILINOS_BLAS}
-               ${TRILINOS_LAPACK}
-               ${MACOSX_RPATH}
-               -D TPL_ENABLE_Netcdf:BOOL=ON
-               -D Netcdf_LIBRARY_DIRS:PATH=${netcdf_library_dirs}
-               -D TPL_Netcdf_INCLUDE_DIRS:PATH=${netcdf_include_dirs}
-               -D CMAKE_INSTALL_RPATH:PATH=${CMAKE_INSTALL_PREFIX}/lib
-               -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
-               -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
-               -D CMAKE_C_FLAGS:STRING=${CFLAGS}
-               -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    DOWNLOAD_COMMAND ""
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-  )
+
+if (BUILD_TRILINOS) 
+  if(trilinos)
+    ExternalProject_Add(
+      trilinos
+      #set(ENV{OMPI_CXX} /vast/home/rjpark/quinoa-tpl/src/trilinos/packages/kokkos/bin/nvcc_wrapper)
+      DEPENDS ${netcdf} ${lapack} ${ampi}
+      PREFIX trilinos
+      SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
+      #CONFIGURE_COMMAND 
+      #          ${CMAKE_COMMAND} -E env 
+      CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
+                -D TPL_ENABLE_MPI:BOOL=ON
+                -D TPL_ENABLE_CUDA:BOOL=ON
+                -D Kokkos_ENABLE_CUDA=ON
+                -D Kokkos_ARCH_AMPERE80=ON
+                -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
+                -D Trilinos_ENABLE_Zoltan2:BOOL=ON
+                -D Zoltan2_ENABLE_Experimental:BOOL=ON
+                -D Trilinos_ENABLE_SECONDARY_STABLE_CODE:BOOL=ON
+                -D Trilinos_ENABLE_SEACASExodus:BOOL=ON
+                -D Trilinos_ENABLE_SEACASExodiff:BOOL=ON
+                -D Trilinos_ENABLE_Fortran=OFF
+                -D Trilinos_ENABLE_DEBUG=OFF
+                ${TRILINOS_SHARED}
+                ${TRILINOS_ALPINE}
+                ${TRILINOS_BLAS}
+                ${TRILINOS_LAPACK}
+                ${MACOSX_RPATH}
+                -D TPL_ENABLE_Netcdf:BOOL=ON
+                -D Netcdf_LIBRARY_DIRS:PATH=${netcdf_library_dirs}
+                -D TPL_Netcdf_INCLUDE_DIRS:PATH=${netcdf_include_dirs}
+                -D CMAKE_INSTALL_RPATH:PATH=${CMAKE_INSTALL_PREFIX}/lib
+                -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
+                -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
+                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
+                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+      DOWNLOAD_COMMAND ""
+      LOG_CONFIGURE 1
+      LOG_BUILD 1
+      LOG_INSTALL 1
+    )
+  endif()
 endif()
 
 #### PEGTL (Parsing Expression Grammar Template Library) #######################
