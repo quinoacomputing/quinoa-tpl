@@ -746,7 +746,7 @@ if(trilinos)
 
   ExternalProject_Add(
     trilinos
-    DEPENDS ${netcdf} ${lapack} ${ampi} ${charm}  # 'depends' on charm, so that charm builds before the nvcc_wrapper is loaded
+    DEPENDS ${netcdf} ${lapack} ${ampi}
     PREFIX trilinos
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
     BINARY_DIR ${CMAKE_BINARY_DIR}/src/trilinos
