@@ -672,6 +672,21 @@ endif()
 
 ##### Trilinos #################################################################
 ## http://trilinos.sandia.gov
+
+# NVCC path users can pass on the cmd line
+set(NVCC_WRAPPER "" CACHE FILEPATH "Path to Kokkos nvcc_wrapper")
+# User-configurable Kokkos arch token (empty = none)
+set(KOKKOS_ARCH "" CACHE STRING "Kokkos architecture token, e.g. VOLTA70, TURING75, AMPERE80, HOPPER90")
+
+# build the NVCC env launcher only if NVCC path is specified
+set(NVCC_ENV)  # empty by default
+if (NVCC_WRAPPER)
+  message(STATUS "Will build Trilinos/Kokkos with CUDA")
+  message(STATUS "NVCC wrapper: ${NVCC_WRAPPER}")
+  set(NVCC_ENV ${CMAKE_COMMAND} -E env
+               OMPI_CXX=${NVCC_WRAPPER})
+endif()
+
 if(NOT ENABLE_AMPI)
   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=ON")
 else()
@@ -691,12 +706,8 @@ else()
   set(TRILINOS_LAPACK -DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib)
 endif()
 if(trilinos)
-  ExternalProject_Add(
-    trilinos
-    DEPENDS ${netcdf} ${lapack} ${ampi}
-    PREFIX trilinos
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
-    CMAKE_ARGS -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
+  set(TRILINOS_ARGS
+               -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
                -D TPL_ENABLE_MPI:BOOL=ON
                -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES=OFF
                -D Trilinos_ENABLE_Zoltan2:BOOL=ON
@@ -720,7 +731,29 @@ if(trilinos)
                -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
-               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+               -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX})
+
+  if (NVCC_WRAPPER)
+    list(APPEND TRILINOS_ARGS
+         -D TPL_ENABLE_CUDA:BOOL=ON
+         -D Kokkos_ENABLE_CUDA=ON)
+    if(KOKKOS_ARCH)
+      string(TOUPPER "${KOKKOS_ARCH}" _ARCH_UP)
+      message(STATUS "Kokkos architecture: ${_ARCH_UP}")
+      list(APPEND TRILINOS_ARGS "-D;Kokkos_ARCH_${_ARCH_UP}:BOOL=ON")
+    endif()
+  endif()
+
+  ExternalProject_Add(
+    trilinos
+    DEPENDS ${netcdf} ${lapack} ${ampi} ${charm}  # 'depends' on charm, so that charm builds before the nvcc_wrapper is loaded
+    PREFIX trilinos
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
+    BINARY_DIR ${CMAKE_BINARY_DIR}/src/trilinos
+    CONFIGURE_COMMAND ${NVCC_ENV}
+      ${CMAKE_COMMAND} <SOURCE_DIR> ${TRILINOS_ARGS}
+    BUILD_COMMAND   ${NVCC_ENV} ${CMAKE_COMMAND} --build <BINARY_DIR> -j
+    INSTALL_COMMAND ${NVCC_ENV} ${CMAKE_COMMAND} --install <BINARY_DIR>
     DOWNLOAD_COMMAND ""
     LOG_CONFIGURE 1
     LOG_BUILD 1
