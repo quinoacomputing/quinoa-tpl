@@ -895,12 +895,16 @@ if (brigand)
     brigand
     PREFIX brigand
     # Header-only, copy include dir over
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                      ${PROJECT_SOURCE_DIR}/src/brigand/include/brigand
-                      ${CMAKE_INSTALL_PREFIX}/include/brigand
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                     ${PROJECT_SOURCE_DIR}/src/brigand/include/brigand
+                     ${CMAKE_INSTALL_PREFIX}/include/brigand
+    # Will apply patch (if any) in SOURCE_DIR which is the same as install dir
+    SOURCE_DIR ${CMAKE_INSTALL_PREFIX}
+    PATCH_COMMAND
+      patch -p1 -t -i ${PROJECT_SOURCE_DIR}/cmake/cuda_brigand.patch
+    CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
-    DOWNLOAD_COMMAND ""
   )
 endif()
 
