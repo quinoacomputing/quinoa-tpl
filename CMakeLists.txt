@@ -717,6 +717,7 @@ if(trilinos)
                -D Trilinos_ENABLE_SEACASExodiff:BOOL=ON
                -D Trilinos_ENABLE_Fortran=OFF
                -D Trilinos_ENABLE_DEBUG=OFF
+               -D Trilinos_GENERATE_REPO_VERSION_FILE=OFF
                ${TRILINOS_SHARED}
                ${TRILINOS_ALPINE}
                ${TRILINOS_BLAS}
