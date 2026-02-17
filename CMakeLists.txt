@@ -79,6 +79,8 @@ set(ENABLE_BRIGAND ON CACHE BOOL "Enable Brigand")
 set(ENABLE_SOL2 ON CACHE BOOL "Enable Sol")
 set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
 set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
+set(ENABLE_EIGEN ON CACHE BOOL "Enable Eigen")
+set(ENABLE_MUTATIONPP ON CACHE BOOL "Enable Mutation++")
 
 # Set default requested executable targets
 set(REQUESTED_EXECUTABLES unittest inciter meshconv)
@@ -533,6 +535,21 @@ if (ENABLE_MCSS)
   endif()
 endif()
 
+# Eigen (vendored)
+ExternalProject_Add(
+  eigen
+  PREFIX eigen
+  DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${PROJECT_SOURCE_DIR}/src/eigen
+                   ${PROJECT_BINARY_DIR}/eigen
+  SOURCE_DIR  ${PROJECT_BINARY_DIR}/eigen
+  BINARY_DIR  ${PROJECT_BINARY_DIR}/eigen/build
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    -DBUILD_TESTING:BOOL=OFF
+)
+
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
 include(get_compiler_flags)
@@ -830,6 +847,34 @@ if (pugixml)
     LOG_CONFIGURE 1
     LOG_BUILD 1
     LOG_INSTALL 1
+  )
+endif()
+
+if (ENABLE_MUTATIONPP)
+   if (NOT ENABLE_EIGEN)
+     message(FATAL_ERROR "ENABLE_MUTATIONPP=ON requires ENABLE_EIGEN=ON")
+   endif()
+   # DEPEND on the conditional variable ${pugixml} (empty or 'pugixml' target)
+   ExternalProject_Add(
+     mutationpp
+     PREFIX mutationpp
+     DEPENDS eigen ${pugixml}
+     DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                      ${PROJECT_SOURCE_DIR}/src/mutationpp
+                      ${PROJECT_BINARY_DIR}/mutationpp
+     SOURCE_DIR  ${PROJECT_BINARY_DIR}/mutationpp
+     BINARY_DIR  ${PROJECT_BINARY_DIR}/mutationpp/build
+     CMAKE_ARGS
+       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+       -DBUILD_SHARED_LIBS:BOOL=ON
+       -DBUILD_TESTING:BOOL=OFF
+       -DMPP_ENABLE_PYTHON:BOOL=OFF
+       -DCMAKE_PREFIX_PATH:PATH=${CMAKE_INSTALL_PREFIX}
+     LOG_DOWNLOAD 1
+     LOG_CONFIGURE 1
+     LOG_BUILD 1
+     LOG_INSTALL 1
   )
 endif()
 

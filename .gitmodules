@@ -54,3 +54,6 @@
 [submodule "src/mutationpp"]
 	path = src/mutationpp
 	url = https://github.com/mutationpp/Mutationpp.git
+[submodule "src/eigen"]
+	path = src/eigen
+	url = https://github.com/libigl/eigen.git
