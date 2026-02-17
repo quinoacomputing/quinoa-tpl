@@ -51,3 +51,6 @@
 [submodule "src/sol2"]
 	path = src/sol2
 	url = ../../ThePhD/sol2.git
+[submodule "src/mutationpp"]
+	path = src/mutationpp
+	url = https://github.com/mutationpp/Mutationpp.git
