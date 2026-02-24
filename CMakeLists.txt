@@ -79,8 +79,9 @@ set(ENABLE_BRIGAND ON CACHE BOOL "Enable Brigand")
 set(ENABLE_SOL2 ON CACHE BOOL "Enable Sol")
 set(ENABLE_DOXYGEN ON CACHE BOOL "Enable Doxygen")
 set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
-set(ENABLE_EIGEN ON CACHE BOOL "Enable Eigen")
-set(ENABLE_MUTATIONPP ON CACHE BOOL "Enable Mutation++")
+## Mutation is triggered manually by specifying -DENABLE_MUTATIONPP=ON at config
+#set(ENABLE_EIGEN ON CACHE BOOL "Enable Eigen")
+#set(ENABLE_MUTATIONPP ON CACHE BOOL "Enable Mutation++")
 
 # Set default requested executable targets
 set(REQUESTED_EXECUTABLES unittest inciter meshconv)
@@ -104,8 +105,8 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
   set(ENABLE_SOL2 OFF)
   set(ENABLE_DOXYGEN OFF)
   set(ENABLE_MCSS OFF)
-  set(ENABLE_EIGEN OFF)
-  set(ENABLE_MUTATIONPP OFF)
+  #set(ENABLE_EIGEN OFF)
+  #set(ENABLE_MUTATIONPP OFF)
   set(REQUESTED_EXECUTABLES)
 
   # Turn on prerequisites for executable targets configured, these blocks
@@ -138,6 +139,7 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
     set(ENABLE_BOOST ON)
     set(ENABLE_NUMDIFF ON)
     set(ENABLE_SOL2 ON)
+    #set(ENABLE_MUTATIONPP ON)
   endif()
 
   if (MESHCONV_ONLY)
@@ -552,7 +554,7 @@ get_compiler_flags()
 
 set(tpls2build ${charm} ${netcdf} ${boost} ${pugixml} ${pegtl}
 ${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
-${brigand} ${sol2} ${doxygen} ${mcss})
+${brigand} ${sol2} ${doxygen} ${mcss} ${mutationpp} ${eigen})
 
 list(LENGTH tpls2build ntpl)
 
@@ -859,6 +861,9 @@ if (eigen)
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
       -DBUILD_TESTING:BOOL=OFF
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
   )
 endif()
 
