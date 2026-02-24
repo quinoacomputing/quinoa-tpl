@@ -104,6 +104,8 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
   set(ENABLE_SOL2 OFF)
   set(ENABLE_DOXYGEN OFF)
   set(ENABLE_MCSS OFF)
+  set(ENABLE_EIGEN OFF)
+  set(ENABLE_MUTATIONPP OFF)
   set(REQUESTED_EXECUTABLES)
 
   # Turn on prerequisites for executable targets configured, these blocks
@@ -535,20 +537,13 @@ if (ENABLE_MCSS)
   endif()
 endif()
 
-# Eigen (vendored)
-ExternalProject_Add(
-  eigen
-  PREFIX eigen
-  DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${PROJECT_SOURCE_DIR}/src/eigen
-                   ${PROJECT_BINARY_DIR}/eigen
-  SOURCE_DIR  ${PROJECT_BINARY_DIR}/eigen
-  BINARY_DIR  ${PROJECT_BINARY_DIR}/eigen/build
-  CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-    -DBUILD_TESTING:BOOL=OFF
-)
+# mutationpp
+if (ENABLE_MUTATIONPP)
+  # mutationpp depends on Eigen
+  set(ENABLE_EIGEN ON)
+  set(eigen "eigen")
+  set(mutationpp "mutationpp")
+endif()
 
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
 # and echo flags that will be passed to all TPL builds
@@ -850,10 +845,26 @@ if (pugixml)
   )
 endif()
 
-if (ENABLE_MUTATIONPP)
-   if (NOT ENABLE_EIGEN)
-     message(FATAL_ERROR "ENABLE_MUTATIONPP=ON requires ENABLE_EIGEN=ON")
-   endif()
+#### eigen #####################################################################
+if (eigen)
+  ExternalProject_Add(
+    eigen
+    PREFIX eigen
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                     ${PROJECT_SOURCE_DIR}/src/eigen
+                     ${PROJECT_BINARY_DIR}/eigen
+    SOURCE_DIR  ${PROJECT_BINARY_DIR}/eigen
+    BINARY_DIR  ${PROJECT_BINARY_DIR}/eigen/build
+    CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+      -DBUILD_TESTING:BOOL=OFF
+  )
+endif()
+
+#### mutationpp ################################################################
+# https://github.com/mutationpp/Mutationpp
+if (mutationpp)
    # DEPEND on the conditional variable ${pugixml} (empty or 'pugixml' target)
    ExternalProject_Add(
      mutationpp
