@@ -189,6 +189,9 @@ if (charm)
       set(CHARM_ARCH "-x86")
     endif()
 
+  elseif(ARCH MATCHES "arm64")
+    set(CHARM_ARCH "-arm8")
+
   else()
 
     message(FATAL "Selecting a Charm++ architecture for ${ARCH} is not supported")
