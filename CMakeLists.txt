@@ -400,16 +400,6 @@ if (ENABLE_BOOST)
   endif()
 endif()
 
-# Pugixml
-if (ENABLE_PUGIXML)
-  find_package(Pugixml)
-  if(PUGIXML_FOUND)
-    set(pugixml "")
-  else()
-    set(pugixml "pugixml")
-  endif()
-endif()
-
 # PEGTL
 if (ENABLE_PEGTL)
   find_package(PEGTL 2.0.0)
@@ -546,8 +536,19 @@ endif()
 if (ENABLE_MUTATIONPP)
   # mutationpp depends on Eigen
   set(ENABLE_EIGEN ON)
+  set(ENABLE_PUGIXML ON)
   set(eigen "eigen")
   set(mutationpp "mutationpp")
+endif()
+
+# Pugixml
+if (ENABLE_PUGIXML)
+  find_package(Pugixml)
+  if(PUGIXML_FOUND)
+    set(pugixml "")
+  else()
+    set(pugixml "pugixml")
+  endif()
 endif()
 
 # Get compiler flags (CFLAGS, CXXFLAGS, FFLAGS) independent of CMAKE_BUILD_TYPE
@@ -877,7 +878,7 @@ if (mutationpp)
    ExternalProject_Add(
      mutationpp
      PREFIX mutationpp
-     DEPENDS eigen ${pugixml}
+     DEPENDS ${eigen} ${pugixml}
      DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/mutationpp
                       ${PROJECT_BINARY_DIR}/mutationpp
@@ -894,6 +895,17 @@ if (mutationpp)
      LOG_CONFIGURE 1
      LOG_BUILD 1
      LOG_INSTALL 1
+  )
+  # Move Mutationpp/data/ folder to install directory
+  set(TPL_RESOURCE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/mutationpp/data")
+  set(TPL_RESOURCE_DST "${CMAKE_INSTALL_PREFIX}/include/mutation++/data")
+
+  add_custom_target(tpl_copy_resources ALL
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${TPL_RESOURCE_DST}"
+    # copy contents
+    COMMAND /bin/bash -c "set -euo pipefail; cp -a \"${TPL_RESOURCE_SRC}/.\" \"${TPL_RESOURCE_DST}/\""
+    COMMENT "Copying Mutation++ data directory to install folder"
+    VERBATIM
   )
 endif()
 
