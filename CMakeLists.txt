@@ -874,11 +874,23 @@ endif()
 #### mutationpp ################################################################
 # https://github.com/mutationpp/Mutationpp
 if (mutationpp)
+  # Copy Mutationpp/data/ to install directory
+  set(TPL_RESOURCE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/mutationpp/data")
+  set(TPL_RESOURCE_DST "${CMAKE_INSTALL_PREFIX}/include/mutation++/data")
+
+  add_custom_target(mutationpp_copy_resources ALL
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${TPL_RESOURCE_DST}"
+    # copy contents
+    COMMAND /bin/bash -c "set -euo pipefail; cp -a \"${TPL_RESOURCE_SRC}/.\" \"${TPL_RESOURCE_DST}/\""
+    COMMENT "Copying Mutation++ data directory to install folder"
+    VERBATIM
+  )
+
    # DEPEND on the conditional variable ${pugixml} (empty or 'pugixml' target)
    ExternalProject_Add(
      mutationpp
      PREFIX mutationpp
-     DEPENDS ${eigen} ${pugixml}
+     DEPENDS ${eigen} ${pugixml} mutationpp_copy_resources
      DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
                       ${PROJECT_SOURCE_DIR}/src/mutationpp
                       ${PROJECT_BINARY_DIR}/mutationpp
@@ -895,17 +907,6 @@ if (mutationpp)
      LOG_CONFIGURE 1
      LOG_BUILD 1
      LOG_INSTALL 1
-  )
-  # Move Mutationpp/data/ folder to install directory
-  set(TPL_RESOURCE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/mutationpp/data")
-  set(TPL_RESOURCE_DST "${CMAKE_INSTALL_PREFIX}/include/mutation++/data")
-
-  add_custom_target(tpl_copy_resources ALL
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "${TPL_RESOURCE_DST}"
-    # copy contents
-    COMMAND /bin/bash -c "set -euo pipefail; cp -a \"${TPL_RESOURCE_SRC}/.\" \"${TPL_RESOURCE_DST}/\""
-    COMMENT "Copying Mutation++ data directory to install folder"
-    VERBATIM
   )
 endif()
 
