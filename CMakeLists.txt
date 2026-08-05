@@ -702,7 +702,8 @@ if (NVCC_WRAPPER)
   message(STATUS "Will build Trilinos/Kokkos with CUDA")
   message(STATUS "NVCC wrapper: ${NVCC_WRAPPER}")
   set(NVCC_ENV ${CMAKE_COMMAND} -E env
-               OMPI_CXX=${NVCC_WRAPPER})
+               OMPI_CXX=${NVCC_WRAPPER}
+               MPICH_CXX=${NVCC_WRAPPER})
 endif()
 
 if(NOT ENABLE_AMPI)
