@@ -1,0 +1,276 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 153cb90..cf61b26 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,6 +39,42 @@ include(GNUInstallDirs)
+ # Set compiler id
+ string(TOLOWER "${CMAKE_CXX_COMPILER_ID}" COMP)
+ 
++# GPU device compiler selection. These are declared here, ahead of the install
++# prefix, because a HIP build must not share an install tree with a CUDA or
++# CPU-only build: Kokkos permits exactly one GPU architecture per build, and
++# target_architecture() reports x86_64 for every x86 host regardless of which
++# accelerator is attached.
++# NVCC path users can pass on the cmd line
++set(NVCC_WRAPPER "" CACHE FILEPATH "Path to Kokkos nvcc_wrapper")
++# HIP device compiler (hipcc or amdclang++) users can pass on the cmd line
++set(HIP_COMPILER "" CACHE FILEPATH "Path to hipcc or amdclang++")
++# User-configurable Kokkos arch token (empty = none)
++# Token spelling depends on the Kokkos version bundled with the pinned
++# Trilinos: Kokkos < 4.2 spells the AMD archs VEGA908/VEGA90A, 4.2 and later
++# spell them AMD_GFX908/AMD_GFX90A.
++set(KOKKOS_ARCH "" CACHE STRING "Kokkos architecture token, e.g. VOLTA70, TURING75, AMPERE80, HOPPER90, VEGA908, VEGA90A, AMD_GFX90A, AMD_GFX942")
++
++if (NVCC_WRAPPER AND HIP_COMPILER)
++  message(FATAL_ERROR
++          "NVCC_WRAPPER and HIP_COMPILER are mutually exclusive: Kokkos can "
++          "enable only one GPU backend per build.")
++endif()
++
++# Kokkos HIP has no architecture autodetection fallback we can rely on here,
++# and an unsuffixed install tree would let a gfx908 and a gfx90a build
++# overwrite each other, so require the token explicitly.
++set(GPU_INSTALL_SUFFIX "")
++if (HIP_COMPILER)
++  if (NOT KOKKOS_ARCH)
++    message(FATAL_ERROR
++            "HIP_COMPILER requires KOKKOS_ARCH, e.g. -DKOKKOS_ARCH=AMD_GFX90A "
++            "for MI200/MI250 or -DKOKKOS_ARCH=AMD_GFX908 for MI100.")
++  endif()
++  string(TOLOWER "${KOKKOS_ARCH}" _KOKKOS_ARCH_LOWER)
++  string(REGEX REPLACE "^amd_" "" _KOKKOS_ARCH_LOWER "${_KOKKOS_ARCH_LOWER}")
++  set(GPU_INSTALL_SUFFIX "-${_KOKKOS_ARCH_LOWER}")
++endif()
++
+ # Query target architecture
+ include(TargetArch)
+ target_architecture(ARCH)
+@@ -46,9 +82,10 @@ message(STATUS "Detected target architecture: ${ARCH}")
+ 
+ # Set install directory based on compiler ID if was not given on command line
+ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+-  set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install/${COMP}-${ARCH}"
++  set(CMAKE_INSTALL_PREFIX
++      "${PROJECT_SOURCE_DIR}/install/${COMP}-${ARCH}${GPU_INSTALL_SUFFIX}"
+       CACHE STRING "Third-party install prefix." FORCE)
+-  message(STATUS "CMAKE_INSTALL_PREFIX not specified, setting to '${PROJECT_SOURCE_DIR}/install/${COMP}-${ARCH}'")
++  message(STATUS "CMAKE_INSTALL_PREFIX not specified, setting to '${PROJECT_SOURCE_DIR}/install/${COMP}-${ARCH}${GPU_INSTALL_SUFFIX}'")
+ else()
+   message(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
+ endif()
+@@ -371,11 +408,27 @@ endif()
+ # Attempt to find some TPLs on the system
+ 
+ # NetCDF
++# A system NetCDF short-circuits the bundled build below, which leaves Trilinos
++# compiling SEACAS against the system netcdf_meta.h. When that NetCDF was built
++# with HDF5, exodus (exodusII_int.h includes netcdf_meta.h, ex_utils.c calls
++# H5get_libversion under NC_HAS_HDF5 with an extern declaration of its own)
++# ends up referencing HDF5 without anything linking it. GNU ld tolerates the
++# resulting under-linked libexodus; ld.lld rejects it under
++# --no-allow-shlib-undefined. Set FORCE_BUILD_NETCDF to ignore the system copy
++# and build the bundled NetCDF without netcdf-4, so NC_HAS_HDF5 is 0 and the
++# reference is never generated.
++set(FORCE_BUILD_NETCDF OFF CACHE BOOL
++    "Ignore any system NetCDF and build the bundled one")
+ if (ENABLE_NETCDF)
+   if(ENABLE_AMPI)
+     set(NETCDF_ROOT ${CMAKE_INSTALL_PREFIX})
+   endif()
+-  find_package(NetCDF)
++  if (FORCE_BUILD_NETCDF)
++    message(STATUS "FORCE_BUILD_NETCDF: ignoring any system NetCDF")
++    set(NETCDF_FOUND FALSE)
++  else()
++    find_package(NetCDF)
++  endif()
+   if ((ENABLE_AMPI AND NETCDF_FOUND AND
+        NETCDF_INCLUDES MATCHES ${CMAKE_INSTALL_PREFIX}) OR
+       (NOT ENABLE_AMPI AND NETCDF_FOUND))
+@@ -691,20 +744,26 @@ endif()
+ ##### Trilinos #################################################################
+ ## http://trilinos.sandia.gov
+ 
+-# NVCC path users can pass on the cmd line
+-set(NVCC_WRAPPER "" CACHE FILEPATH "Path to Kokkos nvcc_wrapper")
+-# User-configurable Kokkos arch token (empty = none)
+-set(KOKKOS_ARCH "" CACHE STRING "Kokkos architecture token, e.g. VOLTA70, TURING75, AMPERE80, HOPPER90")
++# NVCC_WRAPPER, HIP_COMPILER and KOKKOS_ARCH are declared near the top of this
++# file, because the install prefix depends on them.
+ 
+-# build the NVCC env launcher only if NVCC path is specified
+-set(NVCC_ENV)  # empty by default
++# Build the device-compiler env launcher only if a device compiler is specified.
++# Both MPI wrappers are overridden so this works with OpenMPI and MPICH alike.
++set(DEVICE_CXX_ENV)  # empty by default
+ if (NVCC_WRAPPER)
+   message(STATUS "Will build Trilinos/Kokkos with CUDA")
+   message(STATUS "NVCC wrapper: ${NVCC_WRAPPER}")
+-  set(NVCC_ENV ${CMAKE_COMMAND} -E env
++  set(DEVICE_CXX_ENV ${CMAKE_COMMAND} -E env
+                OMPI_CXX=${NVCC_WRAPPER}
+                MPICH_CXX=${NVCC_WRAPPER})
+ endif()
++if (HIP_COMPILER)
++  message(STATUS "Will build Trilinos/Kokkos with HIP")
++  message(STATUS "HIP compiler: ${HIP_COMPILER}")
++  set(DEVICE_CXX_ENV ${CMAKE_COMMAND} -E env
++               OMPI_CXX=${HIP_COMPILER}
++               MPICH_CXX=${HIP_COMPILER})
++endif()
+ 
+ if(NOT ENABLE_AMPI)
+   set(TRILINOS_SHARED "-DBUILD_SHARED_LIBS=ON")
+@@ -725,6 +784,69 @@ else()
+   set(TRILINOS_LAPACK -DLAPACK_LIBRARY_DIRS=${CMAKE_INSTALL_PREFIX}/lib)
+ endif()
+ if(trilinos)
++  # find_package(MPI) has been observed to report the C wrapper (mpicc) as the
++  # C++ wrapper on some installations, which silently defeats the OMPI_CXX /
++  # MPICH_CXX override below: mpicc honours OMPI_CC, so Trilinos gets built
++  # with the host compiler and the first C++ compile dies on a device flag it
++  # has never heard of. Locate a genuine C++ wrapper next to the C one instead
++  # of trusting the detection.
++  get_filename_component(MPI_BIN_DIR "${MPI_C_COMPILER}" DIRECTORY)
++  find_program(MPI_CXX_WRAPPER
++               NAMES mpicxx mpic++ mpiCC mpiicpc
++               HINTS "${MPI_BIN_DIR}"
++               DOC "MPI C++ wrapper used to build Trilinos")
++
++  if (MPI_CXX_WRAPPER)
++    if (NOT "${MPI_CXX_WRAPPER}" STREQUAL "${MPI_CXX_COMPILER}")
++      message(WARNING
++              "find_package(MPI) reported '${MPI_CXX_COMPILER}' as the MPI C++ "
++              "compiler; building Trilinos with '${MPI_CXX_WRAPPER}' instead.")
++    endif()
++    set(TRILINOS_CXX_COMPILER "${MPI_CXX_WRAPPER}")
++  else()
++    if (NVCC_WRAPPER OR HIP_COMPILER)
++      message(FATAL_ERROR
++              "No MPI C++ wrapper (mpicxx/mpic++/mpiCC) found next to "
++              "'${MPI_C_COMPILER}'. A GPU build routes the device compiler "
++              "through the C++ wrapper and cannot proceed without one.")
++    endif()
++    set(TRILINOS_CXX_COMPILER "${MPI_CXX_COMPILER}")
++  endif()
++
++  # Verify the wrapper actually routes the device compiler, so that a mismatch
++  # fails here in seconds rather than on the first C++ compile of Trilinos.
++  set(MPI_WRAPPER_CHECK ON CACHE BOOL
++      "Verify the MPI C++ wrapper honours OMPI_CXX/MPICH_CXX in GPU builds")
++  if (MPI_WRAPPER_CHECK AND (NVCC_WRAPPER OR HIP_COMPILER))
++    if (NVCC_WRAPPER)
++      set(DEVICE_CXX "${NVCC_WRAPPER}")
++    else()
++      set(DEVICE_CXX "${HIP_COMPILER}")
++    endif()
++    get_filename_component(DEVICE_CXX_NAME "${DEVICE_CXX}" NAME)
++    execute_process(
++      COMMAND ${CMAKE_COMMAND} -E env
++              OMPI_CXX=${DEVICE_CXX} MPICH_CXX=${DEVICE_CXX}
++              ${TRILINOS_CXX_COMPILER} -show
++      OUTPUT_VARIABLE  WRAPPER_SHOW
++      ERROR_VARIABLE   WRAPPER_SHOW_ERR
++      RESULT_VARIABLE  WRAPPER_SHOW_RESULT
++      OUTPUT_STRIP_TRAILING_WHITESPACE)
++    if (NOT WRAPPER_SHOW_RESULT EQUAL 0)
++      message(FATAL_ERROR
++              "'${TRILINOS_CXX_COMPILER} -show' failed: ${WRAPPER_SHOW_ERR}")
++    endif()
++    if (NOT "${WRAPPER_SHOW}" MATCHES "${DEVICE_CXX_NAME}")
++      message(FATAL_ERROR
++              "'${TRILINOS_CXX_COMPILER}' does not honour OMPI_CXX/MPICH_CXX: "
++              "with the override in place, '-show' reports '${WRAPPER_SHOW}', "
++              "which does not mention '${DEVICE_CXX_NAME}'. Trilinos would be "
++              "built with the host compiler and would fail on the first device "
++              "flag. Re-run with -DMPI_WRAPPER_CHECK=OFF to bypass this check.")
++    endif()
++    message(STATUS "MPI C++ wrapper routes to: ${WRAPPER_SHOW}")
++  endif()
++
+   set(TRILINOS_ARGS
+                -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF
+                -D TPL_ENABLE_MPI:BOOL=ON
+@@ -748,7 +870,7 @@ if(trilinos)
+                -D CMAKE_INSTALL_RPATH:PATH=${CMAKE_INSTALL_PREFIX}/lib
+                -D CMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                -D CMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
+-               -D CMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
++               -D CMAKE_CXX_COMPILER:PATH=${TRILINOS_CXX_COMPILER}
+                -D CMAKE_C_FLAGS:STRING=${CFLAGS}
+                -D CMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+                -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX})
+@@ -757,6 +879,20 @@ if(trilinos)
+     list(APPEND TRILINOS_ARGS
+          -D TPL_ENABLE_CUDA:BOOL=ON
+          -D Kokkos_ENABLE_CUDA=ON)
++  endif()
++
++  if (HIP_COMPILER)
++    # Unlike CUDA, HIP is not a TriBITS TPL: there is no TPL_ENABLE_HIP, and
++    # Trilinos reaches the GPU solely through Kokkos_ENABLE_HIP.
++    # CMAKE_CXX_STANDARD is set explicitly because Kokkos only skips that
++    # requirement when it detects the compiler id as HIPCC, and here the
++    # compiler reaches it through the MPI wrapper so it detects Clang.
++    list(APPEND TRILINOS_ARGS
++         -D Kokkos_ENABLE_HIP:BOOL=ON
++         -D CMAKE_CXX_STANDARD:STRING=17)
++  endif()
++
++  if (NVCC_WRAPPER OR HIP_COMPILER)
+     if(KOKKOS_ARCH)
+       string(TOUPPER "${KOKKOS_ARCH}" _ARCH_UP)
+       message(STATUS "Kokkos architecture: ${_ARCH_UP}")
+@@ -764,16 +900,49 @@ if(trilinos)
+     endif()
+   endif()
+ 
++  # ROCm 6 fixups for the Kokkos bundled with the pinned Trilinos.
++  #
++  # Applied in place to the submodule working tree, only for HIP builds, so the
++  # CUDA and CPU paths see an untouched Trilinos. Every entry must be written to
++  # be idempotent, because ExternalProject re-runs the patch step whenever the
++  # build tree's stamps are gone while the submodule stays patched from the
++  # previous build.
++  #
++  # 1. Kokkos <= 4.2.0 prints hipDeviceProp_t::gcnArch, which ROCm 6.0 removed
++  #    (hence hipDeviceProp_tR0600 in the error). Upstream Kokkos renamed the
++  #    read to gcnArchName, which has existed since ROCm 4.x, so the edit is
++  #    also correct on ROCm 5. Diagnostic output only; no semantic change.
++  #    Idempotent: after the substitution "gcnArch\b" no longer matches.
++  # 2. SPADDHandle in the bundled kokkos-kernels defines set_sort_option and
++  #    get_sort_option, which read a member sort_option that is never declared.
++  #    Nothing in the tree calls either accessor, and upstream kokkos-kernels
++  #    deleted both (they are gone by Trilinos 16.1), but ROCm's clang
++  #    diagnoses them where gcc did not. Deleting the two lines matches
++  #    upstream.
++  #    Idempotent: deleting an absent line is a no-op.
++  set(TRILINOS_PATCH_COMMAND)
++  if (HIP_COMPILER)
++    set(KOKKOS_SRC "${PROJECT_SOURCE_DIR}/src/trilinos/packages/kokkos")
++    set(KOKKOS_KERNELS_SRC
++        "${PROJECT_SOURCE_DIR}/src/trilinos/packages/kokkos-kernels")
++    set(TRILINOS_PATCH_COMMAND
++        PATCH_COMMAND sed -i "s/hipProp\\.gcnArch\\b/hipProp.gcnArchName/g"
++                      "${KOKKOS_SRC}/core/src/HIP/Kokkos_HIP_Instance.cpp"
++        COMMAND sed -i -e "/void set_sort_option/d" -e "/int get_sort_option/d"
++                      "${KOKKOS_KERNELS_SRC}/sparse/src/KokkosSparse_spadd_handle.hpp")
++  endif()
++
+   ExternalProject_Add(
+     trilinos
+     DEPENDS ${netcdf} ${lapack} ${ampi}
+     PREFIX trilinos
+     SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/trilinos
+     BINARY_DIR ${CMAKE_BINARY_DIR}/src/trilinos
+-    CONFIGURE_COMMAND ${NVCC_ENV}
++    ${TRILINOS_PATCH_COMMAND}
++    CONFIGURE_COMMAND ${DEVICE_CXX_ENV}
+       ${CMAKE_COMMAND} <SOURCE_DIR> ${TRILINOS_ARGS}
+-    BUILD_COMMAND   ${NVCC_ENV} ${CMAKE_COMMAND} --build <BINARY_DIR> -j
+-    INSTALL_COMMAND ${NVCC_ENV} ${CMAKE_COMMAND} --install <BINARY_DIR>
++    BUILD_COMMAND   ${DEVICE_CXX_ENV} ${CMAKE_COMMAND} --build <BINARY_DIR> -j
++    INSTALL_COMMAND ${DEVICE_CXX_ENV} ${CMAKE_COMMAND} --install <BINARY_DIR>
+     DOWNLOAD_COMMAND ""
+     LOG_CONFIGURE 1
+     LOG_BUILD 1
