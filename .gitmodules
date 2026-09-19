@@ -57,3 +57,6 @@
 [submodule "src/eigen"]
 	path = src/eigen
 	url = https://github.com/libigl/eigen.git
+[submodule "src/amrex"]
+	path = src/amrex
+	url = https://github.com/AMReX-Codes/amrex.git

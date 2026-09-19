@@ -84,10 +84,10 @@ set(ENABLE_MCSS ON CACHE BOOL "Enable m.css")
 #set(ENABLE_MUTATIONPP ON CACHE BOOL "Enable Mutation++")
 
 # Set default requested executable targets
-set(REQUESTED_EXECUTABLES unittest inciter meshconv)
+set(REQUESTED_EXECUTABLES unittest inciter inciterhex meshconv)
 
 # If a *_ONLY variable is set, user only wants specific executable(s)
-if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
+if (UNITTEST_ONLY OR INCITER_ONLY OR INCITERHEX_ONLY OR MESHCONV_ONLY)
 
   # Turn everything off first
   set(ENABLE_CHARM OFF)
@@ -140,6 +140,16 @@ if (UNITTEST_ONLY OR INCITER_ONLY OR MESHCONV_ONLY)
     set(ENABLE_NUMDIFF ON)
     set(ENABLE_SOL2 ON)
     #set(ENABLE_MUTATIONPP ON)
+  endif()
+
+  if (INCITERHEX_ONLY)
+    list(APPEND REQUESTED_EXECUTABLES inciterhex)
+    set(ENABLE_BRIGAND ON)
+    set(ENABLE_LAPACK ON)
+    set(ENABLE_BOOST ON)
+    set(ENABLE_NUMDIFF ON)
+    set(ENABLE_SOL2 ON)
+    set(ENABLE_AMREX ON)
   endif()
 
   if (MESHCONV_ONLY)
@@ -541,6 +551,11 @@ if (ENABLE_MUTATIONPP)
   set(mutationpp "mutationpp")
 endif()
 
+# AMReX
+if (ENABLE_AMREX)
+  set(amrex "amrex")
+endif()
+
 # Pugixml
 if (ENABLE_PUGIXML)
   find_package(Pugixml)
@@ -558,7 +573,7 @@ get_compiler_flags()
 
 set(tpls2build ${charm} ${netcdf} ${boost} ${pugixml} ${pegtl}
 ${lapack} ${trilinos} ${tut} ${numdiff} ${backwardcpp} ${highwayhash}
-${brigand} ${sol2} ${doxygen} ${mcss} ${mutationpp} ${eigen})
+${brigand} ${sol2} ${doxygen} ${mcss} ${mutationpp} ${eigen} ${amrex})
 
 list(LENGTH tpls2build ntpl)
 
@@ -846,6 +861,32 @@ if (pugixml)
                -D BUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
                ${MACOSX_RPATH}
     DOWNLOAD_COMMAND ""
+    LOG_CONFIGURE 1
+    LOG_BUILD 1
+    LOG_INSTALL 1
+  )
+endif()
+
+#### AMReX ####################################################################
+# https://github.com/AMReX-Codes/amrex
+if (amrex)
+  ExternalProject_Add(
+    amrex
+    PREFIX amrex
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory
+                     ${PROJECT_SOURCE_DIR}/src/amrex
+                     ${PROJECT_BINARY_DIR}/amrex
+    SOURCE_DIR  ${PROJECT_BINARY_DIR}/amrex
+    BINARY_DIR  ${PROJECT_BINARY_DIR}/amrex/build
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+      -DCMAKE_C_COMPILER:PATH=${MPI_C_COMPILER}
+      -DCMAKE_CXX_COMPILER:PATH=${MPI_CXX_COMPILER}
+      -DCMAKE_C_FLAGS:STRING=${CFLAGS}
+      -DCMAKE_CXX_FLAGS:STRING=${CXXFLAGS}
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+      -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+    LOG_DOWNLOAD 1
     LOG_CONFIGURE 1
     LOG_BUILD 1
     LOG_INSTALL 1
